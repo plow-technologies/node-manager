@@ -1,0 +1,57 @@
+Name:                   node-manager
+Version:                0.0.0
+Author:                 Hong <hongj77@gmail.com>
+Maintainer:             Hong <hongj77@gmail.com>
+License:                BSD3
+License-File:           LICENSE
+-- Synopsis:               
+-- Description:            
+Cabal-Version:          >= 1.10
+Build-Type:             Simple
+
+Library
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       src
+  GHC-Options:          -Wall
+  Exposed-Modules:      Node.Manager
+  Other-Modules:        Node.Manager.Internal
+  Build-Depends:        base >= 4 && < 5
+                       ,yesod
+                       ,text
+                       ,aeson
+                       ,lens
+                       ,warp
+                       ,wreq
+
+executable node-manager
+  main-is:            Main.hs
+  Default-Language:   Haskell2010
+  hs-source-dirs:     src
+  Build-Depends:      base
+                    , yesod
+                    , text
+                    , aeson
+                    , warp
+                    , wreq
+
+
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       src
+                      , test
+  Ghc-Options:          -Wall
+  Main-Is:              Spec.hs
+  Build-Depends:        base
+                      , hspec
+                       ,yesod
+                       ,text
+                       ,aeson
+                       ,lens
+                       ,warp
+                       ,wreq
+                       
+
+Source-Repository head
+  Type:                 git
+--  Location:             
