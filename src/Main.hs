@@ -1,7 +1,10 @@
-{-# Language QuasiQuotes, TemplateHaskell, TypeFamilies #-}
+{-# Language QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings #-}
 
 import Data.Aeson
 import Yesod
+import Data.Text
+
+
 
 data Manager = Manager
 data Message = Message { content :: Text }
