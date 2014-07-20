@@ -3,7 +3,12 @@
 Node manager is a webserver with background processes designed help monitor node health.
 Simple commands let the user control lots of different types of processes. 
 
-node-managers talk to each other to provide redundant monitoring of processes.
+* node-managers talk to each other to provide redundant monitoring of processes.
+
+* everything in node-manager is designed to be simple and reliable.
+  * Disk IO is simple acid state
+  * All messages are JSON
+
 
 
 ## Usage

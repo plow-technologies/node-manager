@@ -1,5 +1,5 @@
 Name:                   node-manager
-Version:                0.0.0
+Version:                0.1.0
 Author:                 Hong <hongj77@gmail.com>
 Maintainer:             Hong <hongj77@gmail.com>
 License:                BSD3
@@ -14,13 +14,25 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      Node.Manager
-  Other-Modules:        Node.Manager.Internal
+                        Node.Manager.Client
+  Other-Modules:        Node.Manager.Types
+                        Node.Manager.Types.Acid
+                        Node.Manager.Routes.Foundation
+                        Node.Manager.DIG
+                        Node.Manager.TH
+  
   Build-Depends:        base >= 4 && < 5
                        ,yesod
                        ,text
                        ,aeson
+                       ,async               
+                       ,bytestring        
+                       ,acid-state >= 0.12.2
+                       ,safecopy >= 0.8.4
+                       , mtl
                        ,lens
-                       ,warp
+                       ,warp   
+                       ,containers
                        ,wreq
 
 executable node-manager
@@ -30,7 +42,13 @@ executable node-manager
   Build-Depends:      base
                     , yesod
                     , text
+                    , async
+                    ,bytestring
+                    , acid-state
+                    , safecopy
+                    , mtl
                     , aeson
+                    ,containers
                     , warp
                     , wreq
 
@@ -45,6 +63,12 @@ Test-Suite spec
   Build-Depends:        base
                       , hspec
                        ,yesod
+                       ,async
+                       ,acid-state
+                       ,safecopy
+                       ,bytestring 
+                       ,mtl
+                       ,containers
                        ,text
                        ,aeson
                        ,lens
