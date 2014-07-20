@@ -1,0 +1,18 @@
+module Node.Manager.Types.Acid () where 
+-- Acid
+import Control.Monad.Reader ( ask )
+import Control.Monad.State  ( put )
+import Data.SafeCopy        (  base, deriveSafeCopy )
+import Data.Acid           
+
+-- Containers
+import Data.Map
+
+
+
+
+newtype NodeManagerCellStore = NodeManagerCellStore {
+  getNodes :: Map Text 
+
+$(deriveSafeCopy 0 'base ''NodeManagerCellStore)
+
