@@ -1,7 +1,12 @@
 {-# LANGUAGE QuasiQuotes, RecordWildCards, NoImplicitPrelude
   , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
 
-module Node.Manager.DIG () where
+module Node.Manager.DIG (
+                          insertStoredNode
+                        , deleteStoredNode
+                        , getStoredNode
+                        , fetchStoredNodes                         
+                        ) where
 
 
 import Node.Manager.Lens
@@ -9,7 +14,7 @@ import Node.Manager.Types
 import Prelude 
 import Control.Lens
 -- import Control.Applicative
--- import Control.Monad
+import Control.Monad.IO.Class
 
 
 -- Serialization
@@ -19,7 +24,8 @@ import Data.Aeson
 import qualified Data.ByteString.Lazy as BL
 -- Acid
 
--- import Data.Aci
+import Data.Acid
+import Data.Acid.Advanced (query', update')
 
 -- Containers
 -- import Data.Map.Strict
@@ -27,6 +33,8 @@ import qualified Data.ByteString.Lazy as BL
 
 -- Local
 -- import Node.Manager.Client
+
+-- import Node.Manager.Types.Acid
 
 
 
@@ -36,7 +44,7 @@ import qualified Data.ByteString.Lazy as BL
 
 makeStorableProcess :: ClientNodeProc -> StorableNodeProc
 makeStorableProcess txtNodeproc = over checkBody_ (BL.toStrict.encode) txtNodeproc
-
+ 
 
 
 makeClientProcess :: StorableNodeProc -> Either Text ClientNodeProc  
@@ -46,4 +54,35 @@ makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromSt
 
 
 
+insertStoredNode
+  :: MonadIO m =>
+     AcidState (EventState InsertNode)
+     -> ClientNodeProc -> m (EventResult InsertNode)
+insertStoredNode st cnp = do
+  let snp = makeStorableProcess cnp
+  update' st (InsertNode snp)
 
+
+deleteStoredNode
+  :: MonadIO m =>
+     AcidState (EventState DeleteNode)
+     -> Name -> m (EventResult DeleteNode)
+deleteStoredNode st name = do
+  update' st (DeleteNode name)
+
+
+-- getStoredNode  :: MonadIO m => AcidState (EventState GetNode) -> Name -> m (EventResult GetNode)
+getStoredNode
+  :: MonadIO m =>
+     AcidState (EventState GetNode)
+     -> Name -> m (Either Text ClientNodeProc)  
+getStoredNode st name = do
+  rslt <- query' st (GetNode name)
+  maybe (return $ Left (append name "not found"))  (return . makeClientProcess) rslt
+
+-- fetchStoredNodes
+--   :: MonadIO m =>
+--      AcidState (EventState ReturnNodes) -> m (EventResult ReturnNodes)
+fetchStoredNodes st = do
+  nodes <- query' st ReturnNodes
+  return $ fmap makeClientProcess  nodes

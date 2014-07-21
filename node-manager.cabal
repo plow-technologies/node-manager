@@ -21,7 +21,8 @@ Library
                         Node.Manager.DIG
                         Node.Manager.TH
   
-  Build-Depends:        base >= 4 && < 5
+  Build-Depends:        transformers >= 0.4.1.0,
+                        base >= 4 && < 5
                        ,yesod
                        ,text
                        ,aeson
@@ -39,7 +40,8 @@ executable node-manager
   main-is:            Main.hs
   Default-Language:   Haskell2010
   hs-source-dirs:     src
-  Build-Depends:      base
+  Build-Depends:      transformers >= 0.4.1.0,
+                      base
                     , yesod
                     , text
                     , async

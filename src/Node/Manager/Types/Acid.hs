@@ -2,9 +2,7 @@
   , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Node.Manager.Types.Acid (NodeManagerCellStore (..)
-                               ,returnNodes
-                               ,getNode) where 
+module Node.Manager.Types.Acid  where 
 
 
 import Prelude hiding (lookup)
@@ -69,6 +67,6 @@ deleteNode name = do
   nodes <- getNodes <$> get
   put (NodeManagerCellStore (delete name nodes))
 
-$(makeAcidic ''NodeManagerCellStore ['insertNode, 'deleteNode])
+$(makeAcidic ''NodeManagerCellStore ['insertNode, 'deleteNode, 'getNode, 'returnNodes])
                                          
   
