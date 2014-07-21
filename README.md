@@ -30,6 +30,7 @@ data NodeProcess = NodeProcess {
          , checkKillMethod :: KillNONE
          
      }
+```
 
 ### Register a process
 (using wreq in this example)
