@@ -28,14 +28,7 @@ import Data.Acid
 import Data.Acid.Advanced (query', update')
 
 -- Containers
--- import Data.Map.Strict
--- import Data.ByteString
-
--- Local
--- import Node.Manager.Client
-
--- import Node.Manager.Types.Acid
-
+import Data.Map.Strict
 
 
 -- | There is a natural asymmetry between any parser and encoder ...
@@ -80,9 +73,10 @@ getStoredNode st name = do
   rslt <- query' st (GetNode name)
   maybe (return $ Left (append name "not found"))  (return . makeClientProcess) rslt
 
--- fetchStoredNodes
---   :: MonadIO m =>
---      AcidState (EventState ReturnNodes) -> m (EventResult ReturnNodes)
+
+fetchStoredNodes  :: MonadIO m =>
+     AcidState (EventState ReturnNodes)
+     -> m (Map Text (Either Text ClientNodeProc))
 fetchStoredNodes st = do
   nodes <- query' st ReturnNodes
   return $ fmap makeClientProcess  nodes
