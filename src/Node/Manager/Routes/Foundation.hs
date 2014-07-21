@@ -9,11 +9,12 @@ import Yesod
 
 import Node.Manager.Types.Acid
 
+import Data.Acid
+
 data NodeManager = NodeManager {
-    nodes  :: NodeManagerCellStore 
+    nodes  :: (AcidState NodeManagerCellStore)
 }       
 
 mkYesodData "NodeManager" $(parseRoutesFile "node-manager-routes")
-
 
 

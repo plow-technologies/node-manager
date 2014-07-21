@@ -6,7 +6,7 @@ module Node.Manager.Types (module Node.Manager.Types  ) where
 import Data.Aeson
 import Data.ByteString
 
-import Node.Manager.Client.Types
+import Node.Manager.Client.Types as Node.Manager.Types
 import Node.Manager.Routes.Foundation as Node.Manager.Types
 import Node.Manager.Types.Acid as Node.Manager.Types
 {-|
