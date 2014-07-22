@@ -15,10 +15,10 @@ Simple commands let the user control lots of different types of processes.
 
 ### Adding a Configuration
 
-To add a new configuratino to serve to nodes...
+To add a new configuration to serve to nodes...
 
 ```
-$> post "http://some.lame.nodemanager.com/configuration/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  "host":"www.stupidurl.com", "port": 2]]))
+$> post "http://some.lame.nodemanager.com/configure/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  "host":"www.stupidurl.com", "port": 2]]))
 
 Success ! Configuration: alarm-state-config ... Added
 
@@ -55,7 +55,9 @@ The client(The Node) requests the config (from the node manager) with:
 
 ```
 
-$> post "http://some.lame.nodemanager.com/configuration/find" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val", 2)])])
+$> post "http://some.lame.nodemanager.com/configure/find" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val", 2)])])
+
+```
 
 returns ...
 

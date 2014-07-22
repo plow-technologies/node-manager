@@ -1,3 +1,6 @@
 / HomeR GET
 
 /nodes/add AddNewR POST
+
+/configure/find EditConfigureR POST
+/configure/add AddConfigureR POST

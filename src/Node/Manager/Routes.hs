@@ -37,7 +37,7 @@ getHomeR = do
 
 
 -- | insert a new nodeprocess to monitor
--- | /nodes/add POST
+-- | /nodes/add AddNewR POST
 
 postAddNewR :: Handler Value
 postAddNewR = do
@@ -61,10 +61,8 @@ postAddNewR = do
 
 
 -- | get Status of a single node
-
 getNodeR :: Handler Value
 getNodeR = undefined
-
 
 
 -- | Kill process running on a node
@@ -90,3 +88,11 @@ registerNodeR = undefined
 unregisterNodeR :: Handler Value
 unregisterNodeR = undefined
 
+
+-- | configure nodes, add new configurations
+-- | /configure/find EditConfigureR POST
+postEditConfigureR :: Handler Value
+postEditConfigureR = undefined 
+
+postAddConfigureR :: Handler Value
+postAddConfigureR = undefined
