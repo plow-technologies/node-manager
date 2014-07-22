@@ -11,7 +11,64 @@ Simple commands let the user control lots of different types of processes.
 
 
 
-## Usage
+## Using to configure Nodes
+
+### Adding a Configuration
+
+To add a new configuratino to serve to nodes...
+
+```
+$> post "http://some.lame.nodemanager.com/configuration/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  "host":"www.stupidurl.com", "port": 2]]))
+
+Success ! Configuration: alarm-state-config ... Added
+
+```
+saves a configuration that looks like:
+
+```
+alarm-state-config:
+   tag: 2
+   src:
+     almKeySrc:
+       unSText: onping.plowtech.net
+   host:www.stupidurl.com
+   port: 2
+
+```
+To be requested by a node in the future
+
+
+### Requesting a Configuration
+Build a yml that has your options with some defaults
+
+```
+alarm-state-config:
+   tag: 2
+   src:
+     almKeySrc:
+       unSText: onping.plowtech.net
+   host:www.stupidurl.com
+   port: I am a port
+
+```
+The client(The Node) requests the config (from the node manager) with:
+
+```
+
+$> post "http://some.lame.nodemanager.com/configuration/find" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val", 2)])])
+
+returns ...
+
+```
+{"alarm-state-config": { "tag": 2, "src":{"almKeySrc":{ "unSText": "onping.plowtech.net"}},  "host":"www.stupidurl.com", "port": 2}}
+```
+
+Which the node can then use to configure itself.
+
+
+
+
+## Using to monitor Nodes
 
 Important types
 
@@ -79,6 +136,7 @@ nodeRegisteredWith http://10.121.38.459 port 2000
 ```
 
 
+
 ### Configure a Node-Manager
 
 ```
@@ -88,6 +146,19 @@ node-manager.yml
 ```
 url: localhost.com
 port: 2000
-
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -8,7 +8,7 @@ module Node.Manager.Types.Acid  where
 import Prelude hiding (lookup)
 
 -- Control
-import Control.Applicative
+import Control.Applicative hiding (empty)
 -- import Control.Monad
 -- import Control.Lens
 
@@ -18,11 +18,11 @@ import Control.Monad.Reader ( ask )
 import Control.Monad.State ( put , get)
 import Data.SafeCopy (  base, deriveSafeCopy )
 import Data.Acid
-import Data.Text
+import Data.Text hiding (empty)
 
 -- Containers
 import Data.Map.Strict
-import Data.ByteString
+import Data.ByteString hiding (empty)
 
 -- Local
 import Node.Manager.Client
@@ -34,6 +34,8 @@ import Node.Manager.Client
 newtype NodeManagerCellStore = NodeManagerCellStore {
   getNodes :: Map Text (NodeProcess ByteString)
 }
+
+initNodeManagerCellStore = NodeManagerCellStore { getNodes = empty}
 
 
 $(deriveSafeCopy 0 'base ''CheckType)

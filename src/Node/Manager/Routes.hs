@@ -14,11 +14,12 @@ import Node.Manager.Routes.Foundation
 import Node.Manager.Types
 import Prelude
 import Yesod
+import Data.Acid
 import Network.HTTP.Types.Status
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 
-instance Yesod NodeManager where
+instance Yesod NodeManager 
 
 -- Remember this is where your route modifiers go... Like magic   
 --  maximumContentLength _ (Just (AlarmDataR )) = Just $ 2 * 1024 * 1024 * 1024
@@ -47,7 +48,7 @@ postAddNewR = do
       sendResponseStatus status501 (toJSON e)
     Success cnp -> do
       nodes' <- insertStoredNode nodeState cnp
-      createCheckpoint nodeState
+      liftIO $ createCheckpoint nodeState
       return . toJSON $ nodes'
 
 

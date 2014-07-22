@@ -44,18 +44,19 @@ executable node-manager
   hs-source-dirs:     src
   Build-Depends:      http-types >= 0.8.5,
                       transformers >= 0.4.1.0,
-                      base
-                    , yesod
-                    , text
-                    , async
-                    ,bytestring
-                    , acid-state
-                    , safecopy
-                    , mtl
-                    , aeson
-                    ,containers
-                    , warp
-                    , wreq
+                      base >= 4 && < 5
+                     ,yesod
+                     ,text
+                     ,aeson
+                     ,async               
+                     ,bytestring        
+                     ,acid-state >= 0.12.2
+                     ,safecopy >= 0.8.4
+                     , mtl
+                     ,lens
+                     ,warp   
+                     ,containers
+                     ,wreq
 
 
 Test-Suite spec
