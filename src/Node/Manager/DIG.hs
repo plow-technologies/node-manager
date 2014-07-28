@@ -5,7 +5,8 @@ module Node.Manager.DIG (
                           insertStoredNode
                         , deleteStoredNode
                         , getStoredNode
-                        , fetchStoredNodes                         
+                        , fetchStoredNodes   
+                        , getJSON                      
                         ) where
 
 
@@ -80,3 +81,10 @@ fetchStoredNodes  :: MonadIO m =>
 fetchStoredNodes st = do
   nodes <- query' st ReturnNodes
   return $ fmap makeClientProcess  nodes
+
+
+jsonFile :: FilePath
+jsonFile = "testJSON.yml"
+
+getJSON :: IO BL.ByteString
+getJSON = BL.readFile jsonFile

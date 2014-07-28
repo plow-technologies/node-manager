@@ -4,9 +4,11 @@
 module Node.Manager.Client.Types (NodeProcess (..)
                                  , KillMethod
                                  , CheckType
+                                 , ConfigureFile
                                  ) where 
 
 import Data.Text
+import Data.Bool
 import Prelude (Eq,Show,Int)
 import Data.Aeson
 import GHC.Generics
@@ -28,10 +30,23 @@ data NodeProcess v = NodeProcess {
          , checkTime :: Int
          , checkKillMethod :: KillMethod
          
-     }
-                 deriving (Eq,Show,Generic,Typeable)
+     } deriving (Eq,Show,Generic,Typeable)
 
 
+data ConfigureFile = ConfigureFile {
+--          configureFileTag :: Int
+--        , configureFileSrc :: ConfigureSource
+--        , configureFileHost :: Text
+--        , configureFilePort :: Int
+} deriving (Eq,Show,Generic,Typeable)
+
+
+--instance FromJSON ConfigureSource where
+--instance ToJSON ConfigureSource where
+
+
+instance ToJSON ConfigureFile where
+instance FromJSON ConfigureFile where
 
 
 instance ToJSON CheckType where

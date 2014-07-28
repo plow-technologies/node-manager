@@ -55,7 +55,7 @@ The client(The Node) requests the config (from the node manager) with:
 
 ```
 
-$> post "http://some.lame.nodemanager.com/configure/find" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val", 2)])])
+$> post "http://some.lame.nodemanager.com/configure/find" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") .= ("val", 2)])])
 
 ```
 
