@@ -4,6 +4,7 @@
 module Node.Manager.Client.Types (NodeProcess (..)
                                  , KillMethod
                                  , CheckType
+                                 , Vedit (..)
                                  ) where 
 
 import Data.Text
@@ -31,6 +32,14 @@ data NodeProcess v = NodeProcess {
          
      } deriving (Eq,Show,Generic,Typeable)
 
+data Vedit = Vedit {
+           editKey :: Text
+         , editValue :: Value 
+} deriving (Eq, Show, Generic, Typeable)
+
+
+instance ToJSON Vedit where
+instance FromJSON Vedit where
 
 instance ToJSON CheckType where
 instance FromJSON CheckType where   

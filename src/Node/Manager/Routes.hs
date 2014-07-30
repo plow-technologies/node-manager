@@ -105,8 +105,8 @@ unregisterNodeR = undefined
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
 postEditConfigureR = do
-  parsed <- parseJsonBody :: Handler (Result Value)
-  case parsed of 
+  rParsed <- parseJsonBody :: Handler (Result Value)
+  case rParsed of 
     Error e -> do sendResponseStatus status501 (toJSON e)
     Success parsed -> do 
       let ptitle = views ( members . key "configName" ._String ) T.unpack parsed
@@ -118,10 +118,17 @@ postEditConfigureR = do
           case configure of
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
-              let rewrite = view _Object json
+              let keyArr = makeKeyArr json
+              newjson = replace json 
               
               return json
 
+
+makeKeyArr :: Value -> [Vedit]
+makeKeyArr json = (view (members . key "rewrite-rules" ._JSON )  json) 
+
+replace :: Value -> [Vedit] -> Value
+replace json edits = foldl (\json edit -> set ( members . key (editKey edit)) (editValue edit) json ) json edits
 
 
 -- | /configure/add AddConfigureR POST
