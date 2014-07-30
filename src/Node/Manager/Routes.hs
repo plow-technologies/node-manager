@@ -10,8 +10,13 @@ import Control.Applicative
 import Control.Lens
 import Data.Aeson
 import Data.Aeson.Lens
+import Data.Maybe
+import qualified Data.Yaml as Y
+import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Lazy.Encoding as TE
+import qualified Data.ByteString.Lazy as LBS
+import qualified Data.ByteString as BS
 import Node.Manager.DIG
 import Node.Manager.Routes.Foundation
 import Node.Manager.Types
@@ -21,8 +26,6 @@ import Data.Acid
 import Network.HTTP.Types.Status
 import Network.Wreq
 import Network.Wreq.Lens
-import qualified Data.ByteString.Lazy as LBS
-import qualified Data.ByteString as BS
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 
@@ -99,21 +102,38 @@ unregisterNodeR = undefined
 
 
 -- | configure nodes, add new configurations
--- | /configure/find EditConfigureR POST
+-- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
-postEditConfigureR = undefined
+postEditConfigureR = do
+  parsed <- parseJsonBody :: Handler (Result Value)
+  case parsed of 
+    Error e -> do sendResponseStatus status501 (toJSON e)
+    Success parsed -> do 
+      let ptitle = views ( members . key "configName" ._String ) T.unpack parsed
+      case ptitle of 
+        "" -> sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
+        title -> do
+          file <- liftIO $ BS.readFile $ "./configs/" ++ title ++ ".yml"
+          let configure = Y.decode file :: Maybe Value
+          case configure of
+            Nothing -> return . toJSON $ ("" :: String)
+            Just json -> do
+              let rewrite = view _Object json
+              
+              return json
+
+
 
 -- | /configure/add AddConfigureR POST
 postAddConfigureR :: Handler Value
 postAddConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of 
-    Error e -> do 
-      sendResponseStatus status501 (toJSON e)
+    Error e -> do sendResponseStatus status501 (toJSON e)
     Success parsed -> do
-      let mTitle = parsed ^? key "configName" . _String
+      let mTitle = listToMaybe $ views (_Object) (\obj -> fmap fst (HM.toList obj)) parsed
       case mTitle of 
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
-        Just title -> liftIO . (LBS.writeFile $ "./configs/" ++ (T.unpack title)) . encode $ parsed
+        Just title -> liftIO . (LBS.writeFile $ "./configs/" ++ (T.unpack title)  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
 
       return parsed

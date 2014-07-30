@@ -1,0 +1,7 @@
+alarm-state-config:
+  tag: 2
+  src:
+    almKeySrc:
+      unSText: onping.plowtech.net
+  host: www.stupidurl.com
+  port: 2

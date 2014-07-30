@@ -5,8 +5,7 @@ module Node.Manager.DIG (
                           insertStoredNode
                         , deleteStoredNode
                         , getStoredNode
-                        , fetchStoredNodes   
-                        , getJSON                      
+                        , fetchStoredNodes                     
                         ) where
 
 
@@ -83,8 +82,3 @@ fetchStoredNodes st = do
   return $ fmap makeClientProcess  nodes
 
 
-jsonFile :: FilePath
-jsonFile = "testJSON.yml"
-
-getJSON :: IO BL.ByteString
-getJSON = BL.readFile jsonFile

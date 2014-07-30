@@ -36,7 +36,9 @@ Library
                        ,lens
                        ,warp   
                        ,containers
+                       ,unordered-containers >= 0.2.5.0
                        ,wreq
+                       ,yaml
 
 executable node-manager
   main-is:            Main.hs
@@ -56,7 +58,9 @@ executable node-manager
                      ,lens
                      ,warp   
                      ,containers
+                     ,unordered-containers >= 0.2.5.0
                      ,wreq
+                     ,yaml
 
 
 Test-Suite spec
@@ -75,11 +79,13 @@ Test-Suite spec
                        ,bytestring 
                        ,mtl
                        ,containers
+                       ,unordered-containers >= 0.2.5.0
                        ,text
                        ,aeson
                        ,lens
                        ,warp
                        ,wreq
+                       ,yaml
                        
 
 Source-Repository head

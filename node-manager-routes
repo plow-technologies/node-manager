@@ -2,5 +2,5 @@
 
 /nodes/add AddNewR POST
 
-/configure/find EditConfigureR POST
+/configure/edit EditConfigureR POST
 /configure/add AddConfigureR POST
