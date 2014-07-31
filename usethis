@@ -1,7 +1,0 @@
-post "http://localhost:3000/configure/add" ((toJSON (object [ "alarm-state-config" .= object  [ ( "tag" .= 2), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  ("host" .= "www.stupidurl.com"), ("port".= 2)]])) :: Value)
-
-post "http://localhost:3000/configure/edit" ((toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= [ (object [("key" .= "port") , ("val" .= 50)]), (object [("key" .= "tag") , ("val" .= 20)]) ] ]) :: Value)
-
-post "http://localhost:3000/configure/delete" ((toJSON "alarm-state-config") :: Value)
-
-((toJSON (object [ "title" .= object [( "body" .= 2)] ])) :: Value)

@@ -1,4 +1,4 @@
-{-# LANGUAGE QuasiQuotes  , TemplateHaskell, NoMonomorphismRestriction,TypeFamilies, RecordWildCards  
+{-# LANGUAGE QuasiQuotes  , TemplateHaskell, NoMonomorphismRestriction,TypeFamilies, RecordWildCards, NoImplicitPrelude  
   , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -22,14 +22,15 @@ import qualified Data.ByteString as BS
 import Node.Manager.DIG
 import Node.Manager.Routes.Foundation
 import Node.Manager.Types
-import Prelude
+import Prelude hiding (FilePath, readFile)
 import Yesod
 import Data.Acid
 import Network.HTTP.Types.Status
 import Network.Wreq
 import Network.Wreq.Lens
+import Filesystem as FS
+import Filesystem.Path.CurrentOS
 import System.IO.Error hiding (catch)
-import System.Directory
 
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
@@ -160,8 +161,8 @@ postDeleteConfigureR = do
       case pTitle of 
         "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
         title -> do 
-          liftIO . removeExisting $ ("./configs/" ++ title ++ ".yml")
-          return . toJSON $ ("Success! " ++ title ++ " was removed..")
+           liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title ++ ".yml")
+           return . toJSON $ ("Success! " ++ title ++ " was removed..")
       
 
 removeExisting :: FilePath -> IO()
@@ -169,3 +170,23 @@ removeExisting file = removeFile file `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
           | otherwise = throwIO e
+
+postCopyConfigureR :: Handler Value
+postCopyConfigureR = do
+  parsed <- parseJsonBody :: Handler (Result Value)
+  case parsed of 
+    Error e -> do sendResponseStatus status501 (toJSON e)
+    Success parsed -> do
+      let pTarget = views (key "route" . _String) T.unpack parsed
+      case pTarget of 
+        "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
+        target -> do
+          directoryExist <- liftIO $ isDirectory "./configs"
+          case directoryExist of
+            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
+            True -> do
+              allConfigPaths <- liftIO $ listDirectory "./configs"
+              fileList <- liftIO $ traverse readFile allConfigPaths
+              let jsonList = catMaybes $ (map Y.decode fileList :: [Maybe Value])    
+              liftIO $ traverse (post target) jsonList
+              return . toJSON $ ("" :: String)

@@ -60,7 +60,7 @@ alarm-state-config:
 
 
 ### Requesting a Configuration
-returns a JSOn that has the configuration files with your rewrite rules and default configurations.
+returns a JSON that has the configuration files with your rewrite rules and default configurations.
 
 ```
 alarm-state-config:
@@ -97,8 +97,14 @@ $> post "http://some.lame.nodemanager.com/configure/delete" (toJSON "alarm-state
 
 ```
 
+###Copying a Configuration
 
+Another node manager requests the copies of all the configs from another node manager:
 
+```
+$> post "http://some.lame.nodemanager.com/configure/copy" (toJSON object[("route".="another.lame.nodemanager.com/configure/add")]) 
+
+```
 
 
 ## Using to monitor Nodes

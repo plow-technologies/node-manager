@@ -5,3 +5,4 @@
 /configure/edit EditConfigureR POST
 /configure/add AddConfigureR POST
 /configure/delete DeleteConfigureR POST
+/configure/copy CopyConfigureR POST

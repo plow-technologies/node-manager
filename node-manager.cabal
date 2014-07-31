@@ -32,7 +32,7 @@ Library
                        ,bytestring        
                        ,acid-state >= 0.12.2
                        ,safecopy >= 0.8.4
-                       , mtl
+                       ,mtl
                        ,lens
                        ,warp   
                        ,containers
@@ -40,6 +40,9 @@ Library
                        ,wreq
                        ,yaml
                        ,directory
+                       ,system-fileio
+                       ,system-filepath
+
 
 executable node-manager
   main-is:            Main.hs
@@ -55,7 +58,7 @@ executable node-manager
                      ,bytestring        
                      ,acid-state >= 0.12.2
                      ,safecopy >= 0.8.4
-                     , mtl
+                     ,mtl
                      ,lens
                      ,warp   
                      ,containers
@@ -63,6 +66,10 @@ executable node-manager
                      ,wreq
                      ,yaml
                      ,directory
+                     ,system-fileio
+                     ,system-filepath
+
+
 
 
 Test-Suite spec
@@ -89,6 +96,9 @@ Test-Suite spec
                        ,wreq
                        ,yaml
                        ,directory
+                       ,system-fileio
+                       ,system-filepath
+                       
                        
 
 Source-Repository head
