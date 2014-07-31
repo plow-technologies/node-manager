@@ -8,6 +8,7 @@ module Node.Manager.Routes where
 
 import Control.Applicative
 import Control.Lens
+import Control.Exception hiding (Handler)
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.Maybe
@@ -27,6 +28,9 @@ import Data.Acid
 import Network.HTTP.Types.Status
 import Network.Wreq
 import Network.Wreq.Lens
+import System.IO.Error hiding (catch)
+import System.Directory
+
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 
@@ -147,8 +151,21 @@ postAddConfigureR = do
 
 -- | /configure/delete DeleteConfigureR POST
 postDeleteConfigureR :: Handler Value
-postDeleteConfigureR = undefined
+postDeleteConfigureR = do
+  parsed <- parseJsonBody :: Handler (Result Value)
+  case parsed of 
+    Error e -> do sendResponseStatus status501 (toJSON e)
+    Success parsed -> do 
+      let pTitle = views _String T.unpack parsed
+      case pTitle of 
+        "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
+        title -> do 
+          liftIO . removeExisting $ ("./configs/" ++ title ++ ".yml")
+          return . toJSON $ ("Success! " ++ title ++ " was removed..")
+      
 
--- | /configure/replace ReplaceConfigureR POST
-postReplaceConfigureR :: Handler Value
-postReplaceConfigureR = undefined
+removeExisting :: FilePath -> IO()
+removeExisting file = removeFile file `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e

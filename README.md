@@ -37,9 +37,30 @@ alarm-state-config:
 ```
 To be requested by a node in the future
 
+### Replacing a Configuration
+
+To replace existing default configuration files, post the new configuration settings to the same name
+
+```
+$> post "http://some.lame.nodemanager.com/configure/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2000), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  ("host" .= "www.stupidurl.com"), ("port".= 2000)]]))
+
+```
+configuration file is now
+
+```
+alarm-state-config:
+   tag: 2000
+   src:
+     almKeySrc:
+       unSText: onping.plowtech.net
+   host:www.stupidurl.com
+   port: 2000
+
+```
+
 
 ### Requesting a Configuration
-Build a yml that has your options with some defaults
+returns a JSOn that has the configuration files with your rewrite rules and default configurations.
 
 ```
 alarm-state-config:
@@ -66,6 +87,16 @@ returns ...
 ```
 
 Which the node can then use to configure itself.
+
+### Deleting a Configuration
+
+To delete existing configuration files, post the name of the file.
+
+```
+$> post "http://some.lame.nodemanager.com/configure/delete" (toJSON "alarm-state-config")
+
+```
+
 
 
 

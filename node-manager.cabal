@@ -39,6 +39,7 @@ Library
                        ,unordered-containers >= 0.2.5.0
                        ,wreq
                        ,yaml
+                       ,directory
 
 executable node-manager
   main-is:            Main.hs
@@ -61,6 +62,7 @@ executable node-manager
                      ,unordered-containers >= 0.2.5.0
                      ,wreq
                      ,yaml
+                     ,directory
 
 
 Test-Suite spec
@@ -86,6 +88,7 @@ Test-Suite spec
                        ,warp
                        ,wreq
                        ,yaml
+                       ,directory
                        
 
 Source-Repository head
