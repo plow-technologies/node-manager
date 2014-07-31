@@ -11,6 +11,7 @@ import Control.Lens
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.Maybe
+import Data.List (foldl')
 import qualified Data.Yaml as Y
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
@@ -101,15 +102,15 @@ unregisterNodeR = undefined
 
 
 
--- | configure nodes, add new configurations
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
 postEditConfigureR = do
   rParsed <- parseJsonBody :: Handler (Result Value)
+  
   case rParsed of 
     Error e -> do sendResponseStatus status501 (toJSON e)
     Success parsed -> do 
-      let ptitle = views ( members . key "configName" ._String ) T.unpack parsed
+      let ptitle = views (key "configName" . _String) T.unpack parsed
       case ptitle of 
         "" -> sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         title -> do
@@ -118,17 +119,16 @@ postEditConfigureR = do
           case configure of
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
-              let keyArr = makeKeyArr json
-              newjson = replace json 
-              
-              return json
+              let editKeys = makeKeyArr parsed
+                  newjson = rewriteRules json editKeys
+              return newjson
 
 
 makeKeyArr :: Value -> [Vedit]
-makeKeyArr json = (view (members . key "rewrite-rules" ._JSON )  json) 
+makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json) 
 
-replace :: Value -> [Vedit] -> Value
-replace json edits = foldl (\json edit -> set ( members . key (editKey edit)) (editValue edit) json ) json edits
+rewriteRules :: Value -> [Vedit] -> Value
+rewriteRules target edits = foldl' (\json edit -> set (members . key (editKey edit)) (editValue edit) json ) target edits
 
 
 -- | /configure/add AddConfigureR POST
@@ -141,6 +141,14 @@ postAddConfigureR = do
       let mTitle = listToMaybe $ views (_Object) (\obj -> fmap fst (HM.toList obj)) parsed
       case mTitle of 
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
-        Just title -> liftIO . (LBS.writeFile $ "./configs/" ++ (T.unpack title)  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
+        Just title -> do
+          liftIO . (LBS.writeFile $ "./configs/" ++ (T.unpack title)  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
+          return parsed
 
-      return parsed
+-- | /configure/delete DeleteConfigureR POST
+postDeleteConfigureR :: Handler Value
+postDeleteConfigureR = undefined
+
+-- | /configure/replace ReplaceConfigureR POST
+postReplaceConfigureR :: Handler Value
+postReplaceConfigureR = undefined

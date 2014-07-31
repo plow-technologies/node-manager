@@ -13,6 +13,7 @@ import Prelude (Eq,Show,Int)
 import Data.Aeson
 import GHC.Generics
 import Data.Typeable
+import Control.Applicative
 
 data CheckType = GET | POST
                deriving (Eq,Show,Generic,Typeable)
@@ -39,7 +40,14 @@ data Vedit = Vedit {
 
 
 instance ToJSON Vedit where
+  toJSON (Vedit {editKey = k
+               , editValue = v}) = object ["key" .= k
+                                         , "val" .= v]
+
 instance FromJSON Vedit where
+  parseJSON (Object o) = Vedit <$>
+                         o .: "key" <*>
+                         o .: "val"
 
 instance ToJSON CheckType where
 instance FromJSON CheckType where   
