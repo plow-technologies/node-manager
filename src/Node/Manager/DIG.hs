@@ -12,12 +12,12 @@ module Node.Manager.DIG (
                         , fetchStoredNodes
                         ) where
 
-
 import           Control.Lens
 import           Node.Manager.Lens
 import           Node.Manager.Types
 import           Prelude
 -- import Control.Applicative
+import           Control.Monad          (void)
 import           Control.Monad.IO.Class
 
 
@@ -38,47 +38,23 @@ import           Data.Map.Strict
 makeStorableProcess :: ClientNodeProc -> StorableNodeProc
 makeStorableProcess txtNodeproc = over checkBody_ (BL.toStrict.encode) txtNodeproc
 
-
-
 makeClientProcess :: StorableNodeProc -> Either Text ClientNodeProc
 makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromStrict) txtNodeproc of
                                  (Left s) -> Left . pack $ s
                                  (Right v)  -> Right $ set checkBody_ v txtNodeproc
 
-
-
-insertStoredNode
-  :: MonadIO m =>
-     AcidState (EventState InsertNode)
-     -> ClientNodeProc -> m (EventResult InsertNode)
 insertStoredNode st cnp = do
-  let snp = makeStorableProcess cnp
-  update' st (InsertNode snp)
+     let snp = makeStorableProcess cnp
+     void $ insertNode st snp
 
-
-deleteStoredNode
-  :: MonadIO m =>
-     AcidState (EventState DeleteNode)
-     -> Name -> m (EventResult DeleteNode)
 deleteStoredNode st name = do
-  update' st (DeleteNode name)
+     void $ deleteNode st name
 
-
--- getStoredNode  :: MonadIO m => AcidState (EventState GetNode) -> Name -> m (EventResult GetNode)
-getStoredNode
-  :: MonadIO m =>
-     AcidState (EventState GetNode)
-     -> Name -> m (Either Text ClientNodeProc)
 getStoredNode st name = do
-  rslt <- query' st (GetNode name)
-  maybe (return $ Left (append name "not found"))  (return . makeClientProcess) rslt
+      rslt <- getNode st name
+      maybe (return $ Left (append name "not found")) (return . makeClientProcess) rslt
 
-
-fetchStoredNodes  :: MonadIO m =>
-     AcidState (EventState ReturnNodes)
-     -> m (Map Text (Either Text ClientNodeProc))
 fetchStoredNodes st = do
-  nodes <- query' st ReturnNodes
-  return $ fmap makeClientProcess  nodes
-
+      nodes <- returnNodes st
+      return $ fmap makeClientProcess nodes
 

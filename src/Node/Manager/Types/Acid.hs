@@ -32,7 +32,6 @@ import           Node.Manager.Client
 import           SimpleStore
 
 
-
 newtype NodeManagerCellStore = NodeManagerCellStore {
   getNodes :: Map Text (NodeProcess ByteString)
 } deriving (Generic)
@@ -49,37 +48,26 @@ initializeSimpleStore fpr = do
                                                     ) (return) ) ::  IO (SimpleStore NodeManagerCellStore)
    return fAcidSt
 
--- (deriveSafeCopy 0 'base ''CheckType)
--- $(deriveSafeCopy 0 'base ''KillMethod)
--- $(deriveSafeCopy 0 'base ''NodeProcess)
--- $(deriveSafeCopy 0 'base ''NodeManagerCellStore)
+-- | digWith interface
+type Name = Text
 
 
+returnNodes st = do
+            nodes <- getSimpleStore st
+            return nodes
+
+getNode st name = do
+     nodes <- getSimpleStore st
+     return $ lookup name nodes
+
+insertNode st node = do
+     nodes <- getSimpleStore st
+     putSimpleStore st (NodeManagerCellStore (insert (checkName node) node (getNodes nodes)))
+
+deleteNode st name = do
+     nodes <- getSimpleStore st
+     putSimpleStore st (NodeManagerCellStore (delete name (getNodes nodes)))
 
 
-
-
--- -- | digWith interface
--- type Name = Text
-
--- returnNodes :: Query NodeManagerCellStore (Map Text (NodeProcess ByteString))
--- returnNodes = getNodes <$> ask
-
--- getNode :: Name -> Query NodeManagerCellStore (Maybe (NodeProcess ByteString))
--- getNode name = do
---   nodes <- getNodes <$> ask
---   return $ lookup name nodes
-
--- insertNode :: (NodeProcess ByteString) ->  Update NodeManagerCellStore ()
--- insertNode node = do
---   nodes <- getNodes <$> get
---   put (NodeManagerCellStore  (insert  (checkName node) node nodes ))
-
--- deleteNode :: Name -> Update NodeManagerCellStore ()
--- deleteNode name = do
---   nodes <- getNodes <$> get
---   put (NodeManagerCellStore (delete name nodes))
-
--- $(makeAcidic ''NodeManagerCellStore ['insertNode, 'deleteNode, 'getNode, 'returnNodes])
 
 

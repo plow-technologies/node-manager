@@ -35,6 +35,7 @@ import           Node.Manager.DIG
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types
 import           Prelude                        hiding (FilePath, readFile)
+import           SimpleStore
 import           System.IO.Error                hiding (catch)
 import           Yesod
 
@@ -53,8 +54,8 @@ instance Yesod NodeManager
 
 getHomeR :: Handler Value
 getHomeR = do
-  nodeState <- (nodes <$> getYesod)
-  nodes' <- fetchStoredNodes nodeState
+  (NodeManager{nodes=nodeState}) <- getYesod
+  nodes' <- liftIO $ fetchStoredNodes nodeState
   return . toJSON $ nodes'
 
 
@@ -63,7 +64,7 @@ getHomeR = do
 
 postAddNewR :: Handler Value
 postAddNewR = do
-  nodeState <- (nodes <$> getYesod)
+  (NodeManager{nodes=nodeState}) <- getYesod
   rcnp <- parseJsonBody :: Handler (Result ClientNodeProc)
   case rcnp of
     Error e -> do
@@ -72,14 +73,6 @@ postAddNewR = do
       nodes' <- insertStoredNode nodeState cnp
       liftIO $ createCheckpoint nodeState
       return . toJSON $ nodes'
-
-
-
--- | remove Node from monitoring
--- postDeleteNodeR :: Handler Value
--- postDeleteNodeR = do
---   nodeState <- (nodes <$> getYesod)
---   rcnp <- parseJsonBody :: Handler (
 
 
 -- | get Status of a single node
