@@ -1,19 +1,25 @@
-{-# LANGUAGE QuasiQuotes, RecordWildCards, NoImplicitPrelude
-  , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE NoImplicitPrelude  #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE QuasiQuotes        #-}
+{-# LANGUAGE RecordWildCards    #-}
 
 module Node.Manager.Client.Types (NodeProcess (..)
                                  , KillMethod
                                  , CheckType
                                  , Vedit (..)
-                                 ) where 
+                                 ) where
 
-import Data.Text
-import Data.Bool
-import Prelude (Eq,Show,Int)
-import Data.Aeson
-import GHC.Generics
-import Data.Typeable
-import Control.Applicative
+import           Control.Applicative
+import           Data.Aeson
+import           Data.Bool
+import           Data.Serialize
+import           Data.Text
+import           Data.Text.Encoding
+import           Data.Typeable
+import           GHC.Generics
+import           Prelude             (Eq, Int, Show, fmap, ($))
 
 data CheckType = GET | POST
                deriving (Eq,Show,Generic,Typeable)
@@ -22,20 +28,22 @@ data KillMethod = KillUrl Text | KillPID Int | KillNONE
                 deriving (Eq,Show,Generic,Typeable)
 
 
--- | NodeProcess is parameterized in Body, so you can store it 
+-- | NodeProcess is parameterized in Body, so you can store it
 data NodeProcess v = NodeProcess {
-           checkName :: Text
-         , checkUrl :: Text
-         , checkBody :: v
-         , checkMethod :: CheckType
-         , checkTime :: Int
+           checkName       :: Text
+         , checkUrl        :: Text
+         , checkBody       :: v
+         , checkMethod     :: CheckType
+         , checkTime       :: Int
          , checkKillMethod :: KillMethod
-         
+
      } deriving (Eq,Show,Generic,Typeable)
 
+instance (Serialize v) =>  Serialize (NodeProcess v) where
+
 data Vedit = Vedit {
-           editKey :: Text
-         , editValue :: Value 
+           editKey   :: Text
+         , editValue :: Value
 } deriving (Eq, Show, Generic, Typeable)
 
 
@@ -50,11 +58,19 @@ instance FromJSON Vedit where
                          o .: "val"
 
 instance ToJSON CheckType where
-instance FromJSON CheckType where   
+instance FromJSON CheckType where
 
-  
+instance Serialize CheckType where
+
+
 instance ToJSON KillMethod where
-instance FromJSON KillMethod where   
+instance FromJSON KillMethod where
+
+instance Serialize KillMethod where
+
+instance Serialize Text where
+ put txt = put $ encodeUtf8 txt
+ get     = fmap decodeUtf8 get
 
 instance (ToJSON v) => ToJSON (NodeProcess v) where
-instance (FromJSON v) => FromJSON (NodeProcess v) where   
+instance (FromJSON v) => FromJSON (NodeProcess v) where
