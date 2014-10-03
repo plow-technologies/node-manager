@@ -1,21 +1,25 @@
-{-# LANGUAGE QuasiQuotes  , TemplateHaskell, NoMonomorphismRestriction,TypeFamilies, RecordWildCards  , NoImplicitPrelude
-  , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable        #-}
+{-# LANGUAGE DeriveGeneric             #-}
+{-# LANGUAGE NoImplicitPrelude         #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE QuasiQuotes               #-}
+{-# LANGUAGE RecordWildCards           #-}
+{-# LANGUAGE TemplateHaskell           #-}
+{-# LANGUAGE TypeFamilies              #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
 module Node.Manager.Routes.Foundation  where
-import Yesod
-import Prelude 
+import           Prelude
+import           Yesod
 
-import Node.Manager.Types.Acid
-
-
-import Data.Acid
+import           Node.Manager.Types.Acid
 
 data NodeManager = NodeManager {
-    nodes  :: (AcidState NodeManagerCellStore)
-}       
+    nodes :: (AcidState NodeManagerCellStore)
+}
 
 mkYesodData "NodeManager" $(parseRoutesFile "node-manager-routes")
 

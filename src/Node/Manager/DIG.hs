@@ -1,34 +1,34 @@
-{-# LANGUAGE QuasiQuotes, RecordWildCards, NoImplicitPrelude
-  , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE NoImplicitPrelude  #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE QuasiQuotes        #-}
+{-# LANGUAGE RecordWildCards    #-}
 
 module Node.Manager.DIG (
                           insertStoredNode
                         , deleteStoredNode
                         , getStoredNode
-                        , fetchStoredNodes                     
+                        , fetchStoredNodes
                         ) where
 
 
-import Node.Manager.Lens
-import Node.Manager.Types
-import Prelude 
-import Control.Lens
+import           Control.Lens
+import           Node.Manager.Lens
+import           Node.Manager.Types
+import           Prelude
 -- import Control.Applicative
-import Control.Monad.IO.Class
+import           Control.Monad.IO.Class
 
 
 -- Serialization
-import Data.Text
-import Data.Aeson
+import           Data.Aeson
+import           Data.Text
 -- import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BL
--- Acid
-
-import Data.Acid
-import Data.Acid.Advanced (query', update')
+import qualified Data.ByteString.Lazy   as BL
 
 -- Containers
-import Data.Map.Strict
+import           Data.Map.Strict
 
 
 -- | There is a natural asymmetry between any parser and encoder ...
@@ -37,13 +37,13 @@ import Data.Map.Strict
 
 makeStorableProcess :: ClientNodeProc -> StorableNodeProc
 makeStorableProcess txtNodeproc = over checkBody_ (BL.toStrict.encode) txtNodeproc
- 
 
 
-makeClientProcess :: StorableNodeProc -> Either Text ClientNodeProc  
+
+makeClientProcess :: StorableNodeProc -> Either Text ClientNodeProc
 makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromStrict) txtNodeproc of
                                  (Left s) -> Left . pack $ s
-                                 (Right v)  -> Right $ set checkBody_ v txtNodeproc 
+                                 (Right v)  -> Right $ set checkBody_ v txtNodeproc
 
 
 
@@ -68,7 +68,7 @@ deleteStoredNode st name = do
 getStoredNode
   :: MonadIO m =>
      AcidState (EventState GetNode)
-     -> Name -> m (Either Text ClientNodeProc)  
+     -> Name -> m (Either Text ClientNodeProc)
 getStoredNode st name = do
   rslt <- query' st (GetNode name)
   maybe (return $ Left (append name "not found"))  (return . makeClientProcess) rslt

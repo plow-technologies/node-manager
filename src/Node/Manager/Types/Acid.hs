@@ -16,8 +16,6 @@ import Control.Applicative hiding (empty)
 
 import Control.Monad.Reader ( ask )
 import Control.Monad.State ( put , get)
-import Data.SafeCopy (  base, deriveSafeCopy )
-import Data.Acid
 import Data.Text hiding (empty)
 
 -- Containers
@@ -38,37 +36,37 @@ newtype NodeManagerCellStore = NodeManagerCellStore {
 initNodeManagerCellStore = NodeManagerCellStore { getNodes = empty}
 
 
-$(deriveSafeCopy 0 'base ''CheckType)
-$(deriveSafeCopy 0 'base ''KillMethod)
-$(deriveSafeCopy 0 'base ''NodeProcess)
-$(deriveSafeCopy 0 'base ''NodeManagerCellStore)
+$-- (deriveSafeCopy 0 'base ''CheckType)
+-- $(deriveSafeCopy 0 'base ''KillMethod)
+-- $(deriveSafeCopy 0 'base ''NodeProcess)
+-- $(deriveSafeCopy 0 'base ''NodeManagerCellStore)
 
 
 
 
 
   
--- | digWith interface
-type Name = Text
+-- -- | digWith interface
+-- type Name = Text
 
-returnNodes :: Query NodeManagerCellStore (Map Text (NodeProcess ByteString))
-returnNodes = getNodes <$> ask
+-- returnNodes :: Query NodeManagerCellStore (Map Text (NodeProcess ByteString))
+-- returnNodes = getNodes <$> ask
 
-getNode :: Name -> Query NodeManagerCellStore (Maybe (NodeProcess ByteString))
-getNode name = do
-  nodes <- getNodes <$> ask
-  return $ lookup name nodes
+-- getNode :: Name -> Query NodeManagerCellStore (Maybe (NodeProcess ByteString))
+-- getNode name = do
+--   nodes <- getNodes <$> ask
+--   return $ lookup name nodes
 
-insertNode :: (NodeProcess ByteString) ->  Update NodeManagerCellStore ()
-insertNode node = do
-  nodes <- getNodes <$> get  
-  put (NodeManagerCellStore  (insert  (checkName node) node nodes ))
+-- insertNode :: (NodeProcess ByteString) ->  Update NodeManagerCellStore ()
+-- insertNode node = do
+--   nodes <- getNodes <$> get  
+--   put (NodeManagerCellStore  (insert  (checkName node) node nodes ))
 
-deleteNode :: Name -> Update NodeManagerCellStore ()
-deleteNode name = do
-  nodes <- getNodes <$> get
-  put (NodeManagerCellStore (delete name nodes))
+-- deleteNode :: Name -> Update NodeManagerCellStore ()
+-- deleteNode name = do
+--   nodes <- getNodes <$> get
+--   put (NodeManagerCellStore (delete name nodes))
 
-$(makeAcidic ''NodeManagerCellStore ['insertNode, 'deleteNode, 'getNode, 'returnNodes])
+-- $(makeAcidic ''NodeManagerCellStore ['insertNode, 'deleteNode, 'getNode, 'returnNodes])
                                          
   
