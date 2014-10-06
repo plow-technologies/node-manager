@@ -1,9 +1,5 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
-{-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE QuasiQuotes        #-}
-{-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Node.Manager.DIG (
                           insertStoredNode
@@ -36,7 +32,7 @@ import           Data.Map.Strict
 -- | while make Client Process gets a Result
 
 makeStorableProcess :: ClientNodeProc -> StorableNodeProc
-makeStorableProcess txtNodeproc = over checkBody_ (BL.toStrict.encode) txtNodeproc
+makeStorableProcess = over checkBody_ (BL.toStrict.encode)
 
 makeClientProcess :: StorableNodeProc -> Either Text ClientNodeProc
 makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromStrict) txtNodeproc of

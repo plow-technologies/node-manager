@@ -55,7 +55,7 @@ instance Yesod NodeManager
 getHomeR :: Handler Value
 getHomeR = do
   (NodeManager{nodes=nodeState}) <- getYesod
-  nodes' <- liftIO $ fetchStoredNodes nodeState
+  nodes' <- liftIO $ fetchStoredNodes (getNodes nodeState)
   return . toJSON $ nodes'
 
 
@@ -70,7 +70,7 @@ postAddNewR = do
     Error e -> do
       sendResponseStatus status501 (toJSON e)
     Success cnp -> do
-      nodes' <- insertStoredNode nodeState cnp
+      nodes' <- liftIO $ insertStoredNode nodeState cnp
       liftIO $ createCheckpoint nodeState
       return . toJSON $ nodes'
 
@@ -131,6 +131,7 @@ postEditConfigureR = do
 makeKeyArr :: Value -> [Vedit]
 makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json)
 
+
 rewriteRules :: Value -> [Vedit] -> Value
 rewriteRules target edits = foldl' (\json edit -> set (members . key (editKey edit)) (editValue edit) json ) target edits
 
@@ -140,13 +141,13 @@ postAddConfigureR :: Handler Value
 postAddConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
-    Error e -> do sendResponseStatus status501 (toJSON e)
+    Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
-      let mTitle = listToMaybe $ views (_Object) (\obj -> fmap fst (HM.toList obj)) parsed
+      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList obj) parsed
       case mTitle of
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         Just title -> do
-          liftIO . (LBS.writeFile $ "./configs/" ++ (T.unpack title)  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
+          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
           return parsed
 
 -- | /configure/delete DeleteConfigureR POST
@@ -174,7 +175,7 @@ postCopyConfigureR :: Handler Value
 postCopyConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
-    Error e -> do sendResponseStatus status501 (toJSON e)
+    Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
       let pTarget = views (key "route" . _String) T.unpack parsed
       case pTarget of
@@ -186,6 +187,6 @@ postCopyConfigureR = do
             True -> do
               allConfigPaths <- liftIO $ listDirectory "./configs"
               fileList <- liftIO $ traverse readFile allConfigPaths
-              let jsonList = catMaybes $ (map Y.decode fileList :: [Maybe Value])
+              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               liftIO $ traverse (post target) jsonList
               return . toJSON $ ("" :: String)

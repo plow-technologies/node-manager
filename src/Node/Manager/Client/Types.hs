@@ -2,8 +2,7 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE NoImplicitPrelude  #-}
 {-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE QuasiQuotes        #-}
-{-# LANGUAGE RecordWildCards    #-}
+
 
 module Node.Manager.Client.Types (NodeProcess (..)
                                  , KillMethod
@@ -13,7 +12,6 @@ module Node.Manager.Client.Types (NodeProcess (..)
 
 import           Control.Applicative
 import           Data.Aeson
-import           Data.Bool
 import           Data.Serialize
 import           Data.Text
 import           Data.Text.Encoding
