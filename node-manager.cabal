@@ -30,7 +30,7 @@ Library
                        ,aeson
                        ,async               
                        ,bytestring        
-                       ,simple-store >= 0.1.1
+                       ,simple-store >= 0.1.2
                        ,mtl
                        ,lens
                        ,warp   
@@ -58,7 +58,7 @@ executable node-manager
                      ,aeson
                      ,async               
                      ,bytestring        
-                     ,simple-store >= 0.1.1
+                     ,simple-store >= 0.1.2
                      ,mtl
                      ,lens
                      ,warp   
@@ -75,7 +75,6 @@ executable node-manager
 
 
 
-
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
@@ -85,29 +84,28 @@ Test-Suite spec
   Main-Is:              Spec.hs
   Build-Depends:        base
                       , hspec
-                       ,yesod
-                       ,async
-                       ,simple-store
-                       ,bytestring 
-                       ,mtl
-                       ,containers
-                       ,unordered-containers >= 0.2.5.0
-                       ,text
-                       ,aeson
-                       ,lens
-                       ,warp
-                       ,wreq
-                       ,yaml
-                       ,directory
-                       ,system-fileio
-                       ,system-filepath
-                       ,yxs
-                       ,lens-aeson
-                       ,cereal
-                       ,template-haskell
+                      , yesod
+                      , yesod-test
+                      , async
+                      , simple-store
+                      , bytestring 
+                      , mtl
+                      , containers
+                      , unordered-containers >= 0.2.5.0
+                      , text
+                      , aeson
+                      , lens
+                      , warp
+                      , wreq
+                      , yaml
+                      , directory
+                      , system-fileio
+                      , system-filepath
+                      , lens-aeson
+                      , cereal
+                      , template-haskell
                        
-                       
-
+                      
 Source-Repository head
   Type:                 git
   Location:             git@github.com:plow-technologies/node-manager.git

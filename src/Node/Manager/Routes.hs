@@ -55,7 +55,7 @@ instance Yesod NodeManager
 getHomeR :: Handler Value
 getHomeR = do
   (NodeManager{nodes=nodeState}) <- getYesod
-  nodes' <- liftIO $ fetchStoredNodes (getNodes nodeState)
+  nodes' <- liftIO $ fetchStoredNodes nodeState
   return . toJSON $ nodes'
 
 
@@ -67,8 +67,7 @@ postAddNewR = do
   (NodeManager{nodes=nodeState}) <- getYesod
   rcnp <- parseJsonBody :: Handler (Result ClientNodeProc)
   case rcnp of
-    Error e -> do
-      sendResponseStatus status501 (toJSON e)
+    Error e -> sendResponseStatus status501 (toJSON e)
     Success cnp -> do
       nodes' <- liftIO $ insertStoredNode nodeState cnp
       liftIO $ createCheckpoint nodeState
@@ -105,14 +104,12 @@ unregisterNodeR :: Handler Value
 unregisterNodeR = undefined
 
 
-
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
 postEditConfigureR = do
   rParsed <- parseJsonBody :: Handler (Result Value)
-
   case rParsed of
-    Error e -> do sendResponseStatus status501 (toJSON e)
+    Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
       let ptitle = views (key "configName" . _String) T.unpack parsed
       case ptitle of
@@ -129,11 +126,11 @@ postEditConfigureR = do
 
 
 makeKeyArr :: Value -> [Vedit]
-makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json)
+makeKeyArr = view (key "rewrite-rules" ._JSON)
 
 
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules target edits = foldl' (\json edit -> set (members . key (editKey edit)) (editValue edit) json ) target edits
+rewriteRules = foldl' (\json edit -> set (members . key (editKey edit)) (editValue edit) json)
 
 
 -- | /configure/add AddConfigureR POST
@@ -143,7 +140,7 @@ postAddConfigureR = do
   case parsed of
     Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
-      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList obj) parsed
+      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed
       case mTitle of
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         Just title -> do
@@ -155,7 +152,7 @@ postDeleteConfigureR :: Handler Value
 postDeleteConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
-    Error e -> do sendResponseStatus status501 (toJSON e)
+    Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
       let pTitle = views _String T.unpack parsed
       case pTitle of

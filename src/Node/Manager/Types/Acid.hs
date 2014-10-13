@@ -42,7 +42,7 @@ instance Serialize NodeManagerCellStore where
 initNodeManagerCellStore = NodeManagerCellStore { getNodes = empty}
 
 initializeSimpleStore fpr = do
-   fAcidSt <- (openSimpleStore ( fpr )) >>= (either (\_ -> do
+   fAcidSt <- (openSimpleStore fpr) >>= (either (\_ -> do
                                                         enmCellStore <- (makeSimpleStore fpr initNodeManagerCellStore)
                                                         either (\_ -> fail "SimpleStore won't initialize" ) (return ) enmCellStore
                                                     ) (return) ) ::  IO (SimpleStore NodeManagerCellStore)
@@ -51,10 +51,7 @@ initializeSimpleStore fpr = do
 -- | digWith interface
 type Name = Text
 
-
-returnNodes st = do
-            nodes <- getSimpleStore st
-            return nodes
+returnNodes = getSimpleStore
 
 getNode st name = do
      nodes <- getSimpleStore st

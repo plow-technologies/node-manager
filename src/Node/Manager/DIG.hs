@@ -8,13 +8,13 @@ module Node.Manager.DIG (
                         , fetchStoredNodes
                         ) where
 
+import           Control.Applicative    ((<$>))
 import           Control.Lens
+import           Control.Monad          (void)
+import           Control.Monad.IO.Class
 import           Node.Manager.Lens
 import           Node.Manager.Types
 import           Prelude
--- import Control.Applicative
-import           Control.Monad          (void)
-import           Control.Monad.IO.Class
 
 
 -- Serialization
@@ -43,8 +43,7 @@ insertStoredNode st cnp = do
      let snp = makeStorableProcess cnp
      void $ insertNode st snp
 
-deleteStoredNode st name = do
-     void $ deleteNode st name
+deleteStoredNode st name = void $ deleteNode st name
 
 getStoredNode st name = do
       rslt <- getNode st name
@@ -52,5 +51,5 @@ getStoredNode st name = do
 
 fetchStoredNodes st = do
       nodes <- returnNodes st
-      return $ fmap makeClientProcess nodes
+      return $ fmap makeClientProcess (getNodes nodes)
 

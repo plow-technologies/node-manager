@@ -29,10 +29,11 @@ import           Yesod
 nodeManagerMain :: IO ()
 nodeManagerMain =
   do
-  efoundation <- mkFoundation
-  case efoundation of
-    Left e -> print e
-    Right foudnation -> warp 3000 foundation
+  foundation <- mkFoundation
+  warp 3000 foundation
+  -- case efoundation of
+  --   Left e -> print e
+  --   Right foundation -> warp 3000 foundation
 
 
 

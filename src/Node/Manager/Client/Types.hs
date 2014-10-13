@@ -11,6 +11,7 @@ module Node.Manager.Client.Types (NodeProcess (..)
                                  ) where
 
 import           Control.Applicative
+import           Control.Monad       (fail)
 import           Data.Aeson
 import           Data.Serialize
 import           Data.Text
@@ -54,6 +55,7 @@ instance FromJSON Vedit where
   parseJSON (Object o) = Vedit <$>
                          o .: "key" <*>
                          o .: "val"
+  parseJSON _ = fail "Rule: Expecting Vedit Object Received, Other"
 
 instance ToJSON CheckType where
 instance FromJSON CheckType where
