@@ -25,6 +25,7 @@ import           Data.List                      (foldl')
 import           Data.Maybe
 import qualified Data.Text                      as T
 import qualified Data.Text.Lazy.Encoding        as TE
+import qualified Data.Vector                    as V (Vector, toList)
 import qualified Data.Yaml                      as Y
 import           Filesystem                     as FS
 import           Filesystem.Path.CurrentOS
@@ -187,3 +188,27 @@ postCopyConfigureR = do
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               liftIO $ traverse (post target) jsonList
               return . toJSON $ ("" :: String)
+
+-- buildFilePaths :: V.Vector String -> [FilePath]
+-- buildFilePaths titles = fromText . T.pack <$> titles
+
+-- postCloneConfigureR :: Handler Value
+-- postCloneConfigureR = do
+--   parsed <- parseJsonBody :: Handler (Result Value)
+--   case parsed of
+--     Error e -> sendResponseStatus status501 (toJSON e)
+--     Success parsed -> do
+--       let pTarget = views (key "route" . _String) T.unpack parsed
+--       case pTarget of
+--         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
+--         target -> do
+--           directoryExist <- liftIO $ isDirectory "./configs"
+--           case directoryExist of
+--             False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
+--             True -> do
+--               let cloneList = views (key "nameList" .  _Array . _String) T.unpack parsed
+--                   allConfigPaths = buildFilePaths cloneList
+--               fileList <- liftIO $ traverse readFile allConfigPaths
+--               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
+--               liftIO $ traverse (post target) jsonList
+--               return . toJSON $ ("" :: String)

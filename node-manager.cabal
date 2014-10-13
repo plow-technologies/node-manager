@@ -44,6 +44,7 @@ Library
                        ,lens-aeson
                        ,cereal
                        ,template-haskell
+                       ,vector
 
 
 executable node-manager
@@ -72,6 +73,7 @@ executable node-manager
                      ,lens-aeson
                      ,cereal
                      ,template-haskell
+                     ,vector
 
 
 
@@ -83,6 +85,8 @@ Test-Suite spec
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
   Build-Depends:        base
+                      , http-types
+                      , transformers
                       , hspec
                       , yesod
                       , yesod-test
@@ -104,6 +108,7 @@ Test-Suite spec
                       , lens-aeson
                       , cereal
                       , template-haskell
+                      , vector
                        
                       
 Source-Repository head
