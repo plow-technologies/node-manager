@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE NoImplicitPrelude  #-}
 {-# LANGUAGE OverloadedStrings  #-}
-
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Node.Manager.Client.Types (NodeProcess (..)
                                  , KillMethod
