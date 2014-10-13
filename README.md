@@ -1,4 +1,4 @@
-# node-manager
+# node-manager [![Circle CI](https://circleci.com/gh/plow-technologies/node-manager.png?style=shield)](https://circleci.com/gh/plow-technologies/node-manager)
 
 Node manager is a webserver with background processes designed help monitor node health.
 Simple commands let the user control lots of different types of processes. 
