@@ -4,8 +4,8 @@ Author:                 Hong <hongj77@gmail.com>
 Maintainer:             Hong <hongj77@gmail.com>
 License:                BSD3
 License-File:           LICENSE
--- Synopsis:               
--- Description:            
+Synopsis:               Server that manages alarm nodes
+Description:            Server that manages alarm nodes
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 
@@ -30,8 +30,7 @@ Library
                        ,aeson
                        ,async               
                        ,bytestring        
-                       ,acid-state >= 0.12.2
-                       ,safecopy >= 0.8.4
+                       ,simple-store >= 0.1.2
                        ,mtl
                        ,lens
                        ,warp   
@@ -42,6 +41,10 @@ Library
                        ,directory
                        ,system-fileio
                        ,system-filepath
+                       ,lens-aeson
+                       ,cereal
+                       ,template-haskell
+                       ,vector
 
 
 executable node-manager
@@ -56,8 +59,7 @@ executable node-manager
                      ,aeson
                      ,async               
                      ,bytestring        
-                     ,acid-state >= 0.12.2
-                     ,safecopy >= 0.8.4
+                     ,simple-store >= 0.1.2
                      ,mtl
                      ,lens
                      ,warp   
@@ -68,7 +70,10 @@ executable node-manager
                      ,directory
                      ,system-fileio
                      ,system-filepath
-
+                     ,lens-aeson
+                     ,cereal
+                     ,template-haskell
+                     ,vector
 
 
 
@@ -80,27 +85,32 @@ Test-Suite spec
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
   Build-Depends:        base
+                      , http-types
+                      , transformers
                       , hspec
-                       ,yesod
-                       ,async
-                       ,acid-state
-                       ,safecopy
-                       ,bytestring 
-                       ,mtl
-                       ,containers
-                       ,unordered-containers >= 0.2.5.0
-                       ,text
-                       ,aeson
-                       ,lens
-                       ,warp
-                       ,wreq
-                       ,yaml
-                       ,directory
-                       ,system-fileio
-                       ,system-filepath
+                      , yesod
+                      , yesod-test
+                      , async
+                      , simple-store
+                      , bytestring 
+                      , mtl
+                      , containers
+                      , unordered-containers >= 0.2.5.0
+                      , text
+                      , aeson
+                      , lens
+                      , warp
+                      , wreq
+                      , yaml
+                      , directory
+                      , system-fileio
+                      , system-filepath
+                      , lens-aeson
+                      , cereal
+                      , template-haskell
+                      , vector
                        
-                       
-
+                      
 Source-Repository head
   Type:                 git
---  Location:             
+  Location:             git@github.com:plow-technologies/node-manager.git

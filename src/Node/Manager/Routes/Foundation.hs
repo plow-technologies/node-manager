@@ -1,26 +1,33 @@
-{-# LANGUAGE QuasiQuotes  , TemplateHaskell, NoMonomorphismRestriction,TypeFamilies, RecordWildCards  , NoImplicitPrelude
-  , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable        #-}
+{-# LANGUAGE DeriveGeneric             #-}
+{-# LANGUAGE NoImplicitPrelude         #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE QuasiQuotes               #-}
+{-# LANGUAGE RecordWildCards           #-}
+{-# LANGUAGE TemplateHaskell           #-}
+{-# LANGUAGE TypeFamilies              #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
 module Node.Manager.Routes.Foundation  where
-import Yesod
-import Prelude 
+import           Prelude
+import           Yesod
 
-import Node.Manager.Types.Acid
+-- SimpleStore
+import           SimpleStore
 
-
-import Data.Acid
+import           Node.Manager.Types.Acid
 
 data NodeManager = NodeManager {
-    nodes  :: (AcidState NodeManagerCellStore)
-}       
+    nodes :: (SimpleStore NodeManagerCellStore)
+}
 
 mkYesodData "NodeManager" $(parseRoutesFile "node-manager-routes")
 
 
 mkFoundation :: IO NodeManager
 mkFoundation = do
-  nmcs <- openLocalStateFrom "NodeManagerState" initNodeManagerCellStore
+  nmcs <- initializeSimpleStore "NodeManagerState"
   return $ NodeManager {nodes = nmcs}

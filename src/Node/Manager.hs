@@ -1,5 +1,11 @@
-{-# LANGUAGE QuasiQuotes  , TemplateHaskell, NoMonomorphismRestriction,TypeFamilies, RecordWildCards  
-  , OverloadedStrings, DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable        #-}
+{-# LANGUAGE DeriveGeneric             #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE QuasiQuotes               #-}
+{-# LANGUAGE RecordWildCards           #-}
+{-# LANGUAGE TemplateHaskell           #-}
+{-# LANGUAGE TypeFamilies              #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -11,11 +17,11 @@ module Node.Manager where
 -- import Data.Aeson
 -- import Node.Manager.DIG
 
-import Node.Manager.Routes.Foundation
-import Node.Manager.Routes
+import           Node.Manager.Routes
+import           Node.Manager.Routes.Foundation
 
 -- import Prelude
-import Yesod
+import           Yesod
 -- import Network.HTTP.Types.Status
 
 
@@ -25,6 +31,9 @@ nodeManagerMain =
   do
   foundation <- mkFoundation
   warp 3000 foundation
+  -- case efoundation of
+  --   Left e -> print e
+  --   Right foundation -> warp 3000 foundation
 
 
 

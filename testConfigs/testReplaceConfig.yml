@@ -1,20 +1,21 @@
 # alarm-state-config:
-#    tag: 2
+#    tag: 2000
 #    src:
 #      almKeySrc:
 #        unSText: onping.plowtech.net
-#    host:www.stupidurl.com
-#    port: 2
+#    host: www.aacs-us.com
+#    port: 2000
 
 {
 	"alarm-state-config" : {
-		"tag" : 2,
+		"tag" : "2000",
 		"src" : {
 			"almKeySrc" : {
 				"unSText" : "onping.plowtech.net"
 			}
 		},
-		"host" : "www.stupidurl.com",
-		"port" : 2
+		"host" : "www.aacs-us.com",
+		"port" : 2000
 	}
 }
+

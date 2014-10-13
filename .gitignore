@@ -10,3 +10,5 @@ cabal-dev
 cabal.sandbox.config
 /TAGS
 /src/Node/Manager/DIG.hs~
+NodeManagerState/
+*.aes
