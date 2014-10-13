@@ -7,7 +7,6 @@
 {-# LANGUAGE RecordWildCards           #-}
 {-# LANGUAGE TemplateHaskell           #-}
 {-# LANGUAGE TypeFamilies              #-}
-
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
@@ -39,7 +38,6 @@ import           Prelude                        hiding (FilePath, readFile)
 import           SimpleStore
 import           System.IO.Error                hiding (catch)
 import           Yesod
-
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 

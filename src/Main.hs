@@ -1,11 +1,6 @@
-{-# Language QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
 
-import Data.Aeson
-import Yesod
-import Data.Text
-
-
-import Node.Manager
+import           Node.Manager
 
 main :: IO ()
 main = nodeManagerMain

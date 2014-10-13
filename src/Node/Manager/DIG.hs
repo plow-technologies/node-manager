@@ -8,21 +8,17 @@ module Node.Manager.DIG (
                         , fetchStoredNodes
                         ) where
 
-import           Control.Applicative    ((<$>))
+-- General
 import           Control.Lens
-import           Control.Monad          (void)
-import           Control.Monad.IO.Class
+import           Control.Monad        (void)
 import           Node.Manager.Lens
 import           Node.Manager.Types
 import           Prelude
-
-
+import           SimpleStore          (SimpleStore)
 -- Serialization
 import           Data.Aeson
+import qualified Data.ByteString.Lazy as BL
 import           Data.Text
--- import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy   as BL
-
 -- Containers
 import           Data.Map.Strict
 
@@ -39,17 +35,21 @@ makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromSt
                                  (Left s) -> Left . pack $ s
                                  (Right v)  -> Right $ set checkBody_ v txtNodeproc
 
+insertStoredNode :: SimpleStore NodeManagerCellStore -> ClientNodeProc -> IO ()
 insertStoredNode st cnp = do
      let snp = makeStorableProcess cnp
      void $ insertNode st snp
 
+deleteStoredNode :: SimpleStore NodeManagerCellStore -> Text -> IO ()
 deleteStoredNode st name = void $ deleteNode st name
 
+getStoredNode :: SimpleStore (Map Text StorableNodeProc) -> Text -> IO (Either Text ClientNodeProc)
 getStoredNode st name = do
       rslt <- getNode st name
       maybe (return $ Left (append name "not found")) (return . makeClientProcess) rslt
 
+fetchStoredNodes :: SimpleStore NodeManagerCellStore -> IO (Map Text (Either Text ClientNodeProc))
 fetchStoredNodes st = do
-      nodes <- returnNodes st
-      return $ fmap makeClientProcess (getNodes nodes)
+      nodes' <- returnNodes st
+      return $ fmap makeClientProcess (getNodes nodes')
 

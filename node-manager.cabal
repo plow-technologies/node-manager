@@ -16,7 +16,7 @@ Library
   Exposed-Modules:      Node.Manager
                         Node.Manager.Client
   Other-Modules:        Node.Manager.Types
-                        Node.Manager.Types.Acid
+                        Node.Manager.Types.SimpleStore
                         Node.Manager.Routes
                         Node.Manager.Routes.Foundation
                         Node.Manager.DIG
