@@ -2,4 +2,4 @@
 alarm-key-config:
   src:
     almKeySrc:
-      unSText: onping.plowtech.net
+      unSText: www.example.net

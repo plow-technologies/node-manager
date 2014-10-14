@@ -1,0 +1,2 @@
+stakeout-manager-config:
+  getRemoteHost: "localhost:8000"

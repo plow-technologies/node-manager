@@ -1,5 +1,5 @@
 #Mongo db config informatiom
 mongo-config:
   host: "localhost" 
-  db: "onping_production"
+  db: "example_production"
   port: 27017

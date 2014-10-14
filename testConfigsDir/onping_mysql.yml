@@ -1,0 +1,25 @@
+onping_mysql:
+  Default: &defaults
+    user: test
+    database: onping
+    password: test
+    poolsize: 10    
+    host: *****
+    port: *****
+    user: JohnDoe	
+    password: *****
+
+  Development:
+      <<: *defaults	
+  Testing:
+    database: onping
+    <<: *defaults
+  Staging:
+    database: onping
+    poolsize: 100
+    <<: *defaults
+  Production:
+    database: onping
+    poolsize: 100
+    <<: *defaults
+

@@ -1,7 +1,9 @@
 alarm-state-config:
   callQueueSize: 100
+  mir3UserName:  "exampleUser"
+  mir3Password:  "**********"
   stateFilePath:  "alarmstates"
   alarmStateHost: 127.0.0.1
   alarmStatePort: 2233
-
+ 
 

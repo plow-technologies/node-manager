@@ -49,13 +49,13 @@ testRetriveRequestWRewrite :: Value
 testRetriveRequestWRewrite = object ["configName" .= ("alarm-state-config"::String) , "rewrite-rules" .= object ["key" .= ("port"::String) , "val".= (2000::Int)]]
 
 testCopyRequest :: Value
-testCopyRequest = object ["route".=("http://127.0.0.1:3000/configure/add"::String)]
+testCopyRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String)]
 
 cloneList :: [String]
 cloneList = ["alarm-state-config"]
 
 testCloneRequest :: Value
-testCloneRequest = object ["route".=("http://127.0.0.1:3000/configure/add"::String), "nameList" .= cloneList]
+testCloneRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String), "nameList" .= cloneList]
 
 testDeleteRequest :: String
 testDeleteRequest = "alarm-state-config"
