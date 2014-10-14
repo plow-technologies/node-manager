@@ -9,11 +9,11 @@ import           Yesod.Test
 -- TestCases
 import           TestImport
 -- Specs
-import           NodeSpec   (nodeSpec)
+import           ConfigSpec (configSpec)
 
 main :: IO ()
 main =  do
    foundation <- mkTestFoundation
    hspec $ do
         yesodSpec foundation $ do
-            nodeSpec
+            configSpec

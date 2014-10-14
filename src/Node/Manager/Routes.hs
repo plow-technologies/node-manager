@@ -184,6 +184,35 @@ postCopyConfigureR = do
               void $ liftIO $ traverse (post target) jsonList
               return . toJSON $ ("Copy Success" :: String)
 
+writeConfigFile :: (AsValue s, ToJSON s) => s -> IO ()
+writeConfigFile parsed' = do
+  let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
+  case mTitle of
+        Nothing -> print ( "Could not find field config name" :: T.Text)
+        Just title -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
+
+
+postCloneDiretoryR :: Handler Value
+postCloneDiretoryR = do
+   parsed <- parseJsonBody :: Handler (Result Value)
+   case parsed of
+    Error e -> sendResponseStatus status501 (toJSON e)
+    Success parsed' -> do
+      let pTarget = views (key "diretoryName" . _String) T.unpack parsed'
+      case pTarget of
+        "" -> sendResponseStatus status501 (toJSON ( "Cannot copy an empty diretory" :: T.Text))
+        target -> do
+          let targetDir = fromText . T.pack $ target
+          directoryExist <- liftIO $ isDirectory . fromText . T.pack $ target
+          case directoryExist of
+            False -> sendResponseStatus status501 (toJSON ( T.pack (target ++  "  does not exist")))
+            True -> do
+              allConfigPaths <- liftIO $ listDirectory targetDir
+              fileList <- liftIO $ traverse readFile allConfigPaths
+              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
+              void $ liftIO $ traverse writeConfigFile jsonList
+              return . toJSON $ ("Copy Success" :: String)
+
 getConfigureR :: Handler Value
 getConfigureR = do
   directoryExist <- liftIO $ isDirectory "./configs"
@@ -194,6 +223,7 @@ getConfigureR = do
               fileList <- liftIO $ traverse readFile allConfigPaths
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               return . toJSON $ jsonList
+
 
 
 -- buildFilePaths :: [String] -> IO [FilePath]
