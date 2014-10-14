@@ -10,5 +10,7 @@ cabal-dev
 cabal.sandbox.config
 /TAGS
 /src/Node/Manager/DIG.hs~
-NodeManagerState/
+NodeManagerStates/
 *.aes
+*.yml
+!circle.yml

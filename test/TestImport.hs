@@ -15,6 +15,7 @@ module TestImport
      , testCopyRequest
      , testCloneRequest
      , testDeleteRequest
+     , mkTestFoundation
      ) where
 
 
@@ -22,10 +23,16 @@ import           Control.Monad.IO.Class         as Class
 import           Data.Aeson
 import           Node.Manager.Routes
 import           Node.Manager.Routes.Foundation
+import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
 import           Yesod                          (getYesod)
 import           Yesod.Test
 
 import qualified Data.Yaml                      as Y
+
+mkTestFoundation :: IO NodeManager
+mkTestFoundation = do
+  nmcs <- initializeSimpleStore "NodeManagerStates"
+  return NodeManager {nodes = nmcs}
 
 readTestConf :: FilePath -> IO Value
 readTestConf fPath = do

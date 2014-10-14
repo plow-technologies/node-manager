@@ -13,7 +13,7 @@ import           NodeSpec   (nodeSpec)
 
 main :: IO ()
 main =  do
-   foundation <- mkFoundation
+   foundation <- mkTestFoundation
    hspec $ do
         yesodSpec foundation $ do
             nodeSpec

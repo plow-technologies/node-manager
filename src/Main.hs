@@ -3,4 +3,4 @@
 import           Node.Manager
 
 main :: IO ()
-main = nodeManagerMain
+main = startNodeManager

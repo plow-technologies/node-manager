@@ -12,11 +12,9 @@
 
 
 module Node.Manager.Routes.Foundation  where
-import           Prelude
 import           Yesod
 -- SimpleStore
-import           Node.Manager.Types.SimpleStore (NodeManagerCellStore,
-                                                 initializeSimpleStore)
+import           Node.Manager.Types.SimpleStore (NodeManagerCellStore)
 import           SimpleStore
 
 data NodeManager = NodeManager {
@@ -25,7 +23,3 @@ data NodeManager = NodeManager {
 
 mkYesodData "NodeManager" $(parseRoutesFile "node-manager-routes")
 
-mkFoundation :: IO NodeManager
-mkFoundation = do
-  nmcs <- initializeSimpleStore "NodeManagerState"
-  return NodeManager {nodes = nmcs}
