@@ -29,7 +29,7 @@ import           System.Posix.Resource
 import           Yesod                          (toWaiApp)
 
 defaultNodeManagerConfPath :: OS.FilePath
-defaultNodeManagerConfPath = OS.fromText ("nodeManagerConfig.yml"::Text)
+defaultNodeManagerConfPath = OS.fromText ("node-manager-config.yml"::Text)
 
 defaultConfigStoredPath :: OS.FilePath
 defaultConfigStoredPath = OS.fromText ("./configs"::Text)
