@@ -1,7 +1,11 @@
+-- Root
 / HomeR GET
 
+-- Node Process
 /nodes/add AddNewR POST
 
+-- Config Files
+/configure/get ConfigureR GET
 /configure/edit EditConfigureR POST
 /configure/add AddConfigureR POST
 /configure/delete DeleteConfigureR POST

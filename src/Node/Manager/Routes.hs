@@ -184,6 +184,18 @@ postCopyConfigureR = do
               void $ liftIO $ traverse (post target) jsonList
               return . toJSON $ ("Copy Success" :: String)
 
+getConfigureR :: Handler Value
+getConfigureR = do
+  directoryExist <- liftIO $ isDirectory "./configs"
+  case directoryExist of
+            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
+            True -> do
+              allConfigPaths <- liftIO $ listDirectory "./configs"
+              fileList <- liftIO $ traverse readFile allConfigPaths
+              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
+              return . toJSON $ jsonList
+
+
 -- buildFilePaths :: [String] -> IO [FilePath]
 -- buildFilePaths titles = do
 --       let paths =  fromText . T.pack <$> titles

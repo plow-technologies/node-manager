@@ -46,6 +46,7 @@ deleteStoredNode st name = void $ deleteNode st name
 getStoredNode :: SimpleStore (Map Text StorableNodeProc) -> Text -> IO (Either Text ClientNodeProc)
 getStoredNode st name = do
       rslt <- getNode st name
+      -- return maybe (append name "not found") (makeCientProcess)
       maybe (return $ Left (append name "not found")) (return . makeClientProcess) rslt
 
 fetchStoredNodes :: SimpleStore NodeManagerCellStore -> IO (Map Text (Either Text ClientNodeProc))

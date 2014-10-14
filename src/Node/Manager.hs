@@ -10,8 +10,10 @@ module Node.Manager (  buildNodeManager
 
 
 import           Control.Exception              (finally)
-import           Control.Monad                  (void)
+import           Control.Monad                  (unless, void)
 import           Data.Text                      (Text)
+import           Filesystem                     hiding (readFile, writeFile)
+import           Filesystem.Path
 import qualified Filesystem.Path.CurrentOS      as OS
 import           Network.Wai.Handler.Warp
 import           Node.Manager.Config
@@ -26,6 +28,9 @@ import           Yesod                          (toWaiApp)
 
 defaultNodeManagerConfPath :: OS.FilePath
 defaultNodeManagerConfPath = OS.fromText ("nodeManagerConfig.yml"::Text)
+
+defaultConfigStoredPath :: OS.FilePath
+defaultConfigStoredPath = OS.fromText ("./configs"::Text)
 
 getNumFilesLimit :: IO (Integer, Integer)
 getNumFilesLimit = do
@@ -46,11 +51,30 @@ buildNodeManager nc  =  do
   print ("Initializing store done"::Text)
   return NodeManager {nodes=nmcs}
 
+makeAbsoluteFp :: OS.FilePath -> IO OS.FilePath
+makeAbsoluteFp fp =
+  if absolute fp
+    then return fp
+    else do
+      base <- getWorkingDirectory
+      return $ base </> fp
+
+initializeDirectory :: OS.FilePath -> IO ()
+initializeDirectory dir = do
+  print ("Initializing config files stored directory"::Text)
+  fp <- makeAbsoluteFp dir
+  exists <- isDirectory fp
+  unless exists $ do
+        createDirectory True fp
+        print ("Sucessfully Created Configs stored Diretory."::Text)
+
 startNodeManager :: IO ()
 startNodeManager = do
   nc <- readNodeManagerConf defaultNodeManagerConfPath
   nmFoundation <- buildNodeManager nc
-  finally (print ("Starting ..."::Text) >> startServer nc nmFoundation
+  initializeDirectory defaultConfigStoredPath
+  finally (
+         print ("Starting ..."::Text) >> startServer nc nmFoundation
            ) (void $ do
                  let msg :: Text
                      msg = "Closing Node Manager Server"

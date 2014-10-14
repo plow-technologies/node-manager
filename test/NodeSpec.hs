@@ -3,8 +3,6 @@ module NodeSpec (nodeSpec) where
 
 import           TestImport
 
--- import qualified Filesystem.Path.CurrentOS as OS
-
 nodeSpec :: Spec
 nodeSpec =  ydescribe "postAddConfigureR" $ do
   yit "Parses an config and insert it into the manager" $ do
@@ -30,10 +28,10 @@ nodeSpec =  ydescribe "postAddConfigureR" $ do
             return ()
             -- postBody CopyConfigureR (encode testCloneRequest)
             -- printBody >> statusIs 200
-  ydescribe "postDeleteConfigureR" $
-    yit "Delete a configure using a configure name" $ do
-            postBody DeleteConfigureR (encode testDeleteRequest)
-            printBody >> statusIs 200
+  -- ydescribe "postDeleteConfigureR" $
+  --   yit "Delete a configure using a configure name" $ do
+  --           postBody DeleteConfigureR (encode testDeleteRequest)
+  --           printBody >> statusIs 200
 
 
 
