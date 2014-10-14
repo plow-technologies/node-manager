@@ -1,0 +1,8 @@
+key-route-config:
+  - key: o5435790edb248d57a6000000
+    des: localhost:2233
+
+  - key: o54358069db248d57a6000003
+    des: localhost:2233
+
+

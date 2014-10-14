@@ -118,7 +118,7 @@ postEditConfigureR = do
             Just json'' -> do
               let editKeys = makeKeyArr parsed
                   newjson = rewriteRules json'' editKeys
-              return newjson
+              return  newjson
 
 
 makeKeyArr :: Value -> [Vedit]

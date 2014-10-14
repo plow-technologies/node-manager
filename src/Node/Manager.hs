@@ -6,6 +6,8 @@
 module Node.Manager (  buildNodeManager
                      , startNodeManager
                      , startServer
+                     , initializeDirectory
+                     , defaultConfigStoredPath
                     ) where
 
 
