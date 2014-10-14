@@ -39,14 +39,14 @@ Library
                        ,unordered-containers >= 0.2.5.0
                        ,wreq
                        ,yaml
-                       ,directory
+                      --  ,directory
                        ,system-fileio
                        ,system-filepath
                        ,lens-aeson
                        ,cereal
                        ,template-haskell
-                       ,vector
                        ,streaming-commons
+                       ,unix
 
 
 executable node-manager
@@ -75,9 +75,8 @@ executable node-manager
                      ,lens-aeson
                      ,cereal
                      ,template-haskell
-                     ,vector
                      ,streaming-commons
-
+                     ,unix
 
 
 Test-Suite spec
@@ -105,15 +104,14 @@ Test-Suite spec
                       , warp
                       , wreq
                       , yaml
-                      , directory
+                     -- , directory
                       , system-fileio
                       , system-filepath
                       , lens-aeson
                       , cereal
                       , template-haskell
-                      , vector
                       , streaming-commons
-                       
+                      , unix 
                       
 Source-Repository head
   Type:                 git

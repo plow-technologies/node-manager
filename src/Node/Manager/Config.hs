@@ -45,4 +45,4 @@ instance ToJSON NodeManagerConfig where
 readNodeManagerConf :: OS.FilePath -> IO NodeManagerConfig
 readNodeManagerConf fPath = do
 	fCont <- BS.readFile (OS.encodeString fPath)
-	either (\e -> fail e) (\asc -> return asc) $ decodeEither $ fCont
+	either fail return $ decodeEither fCont

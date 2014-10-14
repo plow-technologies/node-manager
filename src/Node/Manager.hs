@@ -8,20 +8,24 @@ module Node.Manager (  buildNodeManager
                      , startServer
                     ) where
 
-import           Filesystem
-import qualified Filesystem.Path                as FP
+
+import           Control.Exception              (finally)
+import           Control.Monad                  (void)
+import           Data.Text                      (Text)
 import qualified Filesystem.Path.CurrentOS      as OS
 import           Network.Wai.Handler.Warp
 import           Node.Manager.Config
 import           Node.Manager.Routes            ()
 import           Node.Manager.Routes.Foundation
-import           SimpleStore
+import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
+import           SimpleStore                    (closeSimpleStore,
+                                                 createCheckpoint)
 import           System.IO                      (hPrint, stderr)
 import           System.Posix.Resource
-import           Yesod
+import           Yesod                          (toWaiApp)
 
-defaultNodeManagerConfPath :: FilePath
-defaultNodeManagerConfPath = "nodeManagerConfig.yml"
+defaultNodeManagerConfPath :: OS.FilePath
+defaultNodeManagerConfPath = OS.fromText ("nodeManagerConfig.yml"::Text)
 
 getNumFilesLimit :: IO (Integer, Integer)
 getNumFilesLimit = do
@@ -38,23 +42,22 @@ buildNodeManager nc  =  do
   getNumFilesLimit >>= print
   print ("NodeManager Initializing ..." :: Text)
   print ("Initializing store"::Text)
-  nmcs <- initializeSimpleStore . nodeManagerFilePath $ nc
+  nmcs <- initializeSimpleStore . OS.fromText .  managerFilePath $ nc
   print ("Initializing store done"::Text)
-  return
-     NodeManager {nodes=nmcs}
+  return NodeManager {nodes=nmcs}
 
 startNodeManager :: IO ()
 startNodeManager = do
-  nc <- readAlarmConf defaultNodeManagerConfPath
+  nc <- readNodeManagerConf defaultNodeManagerConfPath
   nmFoundation <- buildNodeManager nc
-  finally ( do
-             print ("Starting"::Text)
-             void $ forkFinally (startServer nc nmFoundation) (\e -> ePrint "Node Manager crash" >> ePrint e)
-             ) (void $ do
-                let msg :: Text
-                    msg = "Closing Node Manager Server"
-                hPrint stderr msg
-                createCheckPoint (nodes nmFoundation))
+  finally (print ("Starting ..."::Text) >> startServer nc nmFoundation
+           ) (void $ do
+                 let msg :: Text
+                     msg = "Closing Node Manager Server"
+                 ePrint msg
+                 void $  createCheckpoint (nodes nmFoundation)
+                 closeSimpleStore (nodes nmFoundation))
+
 
 startServer :: NodeManagerConfig -> NodeManager -> IO ()
 startServer nc nmFoundation =  do
