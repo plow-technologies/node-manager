@@ -12,9 +12,9 @@
 
 module Node.Manager.Routes where
 
-import           Control.Applicative
 import           Control.Exception              hiding (Handler)
 import           Control.Lens
+import           Control.Monad                  (void)
 import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString                as BS
@@ -23,20 +23,17 @@ import qualified Data.HashMap.Strict            as HM
 import           Data.List                      (foldl')
 import           Data.Maybe
 import qualified Data.Text                      as T
-import qualified Data.Text.Lazy.Encoding        as TE
-import qualified Data.Vector                    as V (Vector, toList)
 import qualified Data.Yaml                      as Y
 import           Filesystem                     as FS
 import           Filesystem.Path.CurrentOS
 import           Network.HTTP.Types.Status
 import           Network.Wreq
-import           Network.Wreq.Lens
 import           Node.Manager.DIG
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types
 import           Prelude                        hiding (FilePath, readFile)
 import           SimpleStore
-import           System.IO.Error                hiding (catch)
+import           System.IO.Error
 import           Yesod
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
@@ -69,7 +66,7 @@ postAddNewR = do
     Error e -> sendResponseStatus status501 (toJSON e)
     Success cnp -> do
       nodes' <- liftIO $ insertStoredNode nodeState cnp
-      liftIO $ createCheckpoint nodeState
+      void $ liftIO $ createCheckpoint nodeState
       return . toJSON $ nodes'
 
 
@@ -118,9 +115,9 @@ postEditConfigureR = do
           let configure = Y.decode file :: Maybe Value
           case configure of
             Nothing -> return . toJSON $ ("" :: String)
-            Just json -> do
+            Just json'' -> do
               let editKeys = makeKeyArr parsed
-                  newjson = rewriteRules json editKeys
+                  newjson = rewriteRules json'' editKeys
               return newjson
 
 
@@ -129,7 +126,7 @@ makeKeyArr = view (key "rewrite-rules" ._JSON)
 
 
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules = foldl' (\json edit -> set (members . key (editKey edit)) (editValue edit) json)
+rewriteRules = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
 
 
 -- | /configure/add AddConfigureR POST
@@ -138,13 +135,13 @@ postAddConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
     Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed -> do
-      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed
+    Success parsed' -> do
+      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
       case mTitle of
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         Just title -> do
-          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed
-          return parsed
+          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
+          return parsed'
 
 -- | /configure/delete DeleteConfigureR POST
 postDeleteConfigureR :: Handler Value
@@ -152,8 +149,8 @@ postDeleteConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
     Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed -> do
-      let pTitle = views _String T.unpack parsed
+    Success parsed' -> do
+      let pTitle = views _String T.unpack parsed'
       case pTitle of
         "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
         title -> do
@@ -172,8 +169,8 @@ postCopyConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
   case parsed of
     Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed -> do
-      let pTarget = views (key "route" . _String) T.unpack parsed
+    Success parsed' -> do
+      let pTarget = views (key "route" . _String) T.unpack parsed'
       case pTarget of
         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
         target -> do
@@ -184,11 +181,13 @@ postCopyConfigureR = do
               allConfigPaths <- liftIO $ listDirectory "./configs"
               fileList <- liftIO $ traverse readFile allConfigPaths
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
-              liftIO $ traverse (post target) jsonList
-              return . toJSON $ ("" :: String)
+              void $ liftIO $ traverse (post target) jsonList
+              return . toJSON $ ("Copy Success" :: String)
 
--- buildFilePaths :: V.Vector String -> [FilePath]
--- buildFilePaths titles = fromText . T.pack <$> titles
+-- buildFilePaths :: [String] -> IO [FilePath]
+-- buildFilePaths titles = do
+--       let paths =  fromText . T.pack <$> titles
+--       return paths
 
 -- postCloneConfigureR :: Handler Value
 -- postCloneConfigureR = do
@@ -204,8 +203,8 @@ postCopyConfigureR = do
 --           case directoryExist of
 --             False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
 --             True -> do
---               let cloneList = views (key "nameList" .  _Array . _String) T.unpack parsed
---                   allConfigPaths = buildFilePaths cloneList
+--               let cloneList = views (key (T.unpack "nameList") . values)  parsed
+--               allConfigPaths <- liftIO $ listDirectory "./configs"
 --               fileList <- liftIO $ traverse readFile allConfigPaths
 --               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
 --               liftIO $ traverse (post target) jsonList

@@ -17,6 +17,7 @@ Library
                         Node.Manager.Client
   Other-Modules:        Node.Manager.Types
                         Node.Manager.Types.SimpleStore
+                        Node.Manager.Config
                         Node.Manager.Routes
                         Node.Manager.Routes.Foundation
                         Node.Manager.DIG
@@ -45,6 +46,7 @@ Library
                        ,cereal
                        ,template-haskell
                        ,vector
+                       ,streaming-commons
 
 
 executable node-manager
@@ -74,6 +76,7 @@ executable node-manager
                      ,cereal
                      ,template-haskell
                      ,vector
+                     ,streaming-commons
 
 
 
@@ -109,6 +112,7 @@ Test-Suite spec
                       , cereal
                       , template-haskell
                       , vector
+                      , streaming-commons
                        
                       
 Source-Repository head
