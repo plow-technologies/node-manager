@@ -1,0 +1,4 @@
+alarm-log-config:
+  logFilePath: "AlarmLogs"
+  alarmLogHost: 127.0.0.1
+  alarmLogPort: 2234

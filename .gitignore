@@ -13,4 +13,6 @@ cabal.sandbox.config
 NodeManagerStates/
 *.aes
 *.yml
+!testConfigs/*.yml
+!testConfigsDir/*.yml
 !circle.yml

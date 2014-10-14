@@ -1,0 +1,4 @@
+audit-trail-config:
+  auditFilePath:  "AuditTrails"
+  auditTrailHost: 127.0.0.1
+  auditTrailPort: 2235  

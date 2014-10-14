@@ -15,6 +15,7 @@ module TestImport
      , testCopyRequest
      , testCloneRequest
      , testDeleteRequest
+     , testCloneDirRequest
      , mkTestFoundation
      ) where
 
@@ -59,6 +60,8 @@ testCloneRequest = object ["route".=("http://127.0.0.1:3000/configure/add"::Stri
 testDeleteRequest :: String
 testDeleteRequest = "alarm-state-config"
 
+testCloneDirRequest :: Value
+testCloneDirRequest = object ["diretoryName" .= ("testConfigsDir"::String)]
 
 type Spec = YesodSpec NodeManager
 type Example = YesodExample NodeManager

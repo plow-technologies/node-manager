@@ -10,3 +10,4 @@
 /configure/add AddConfigureR POST
 /configure/delete DeleteConfigureR POST
 /configure/copy CopyConfigureR POST
+/configure/clone/diretory CloneDiretoryR POST

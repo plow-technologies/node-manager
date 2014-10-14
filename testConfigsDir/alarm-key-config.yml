@@ -1,0 +1,5 @@
+#Alarm Key information
+alarm-key-config:
+  src:
+    almKeySrc:
+      unSText: onping.plowtech.net

@@ -10,10 +10,12 @@ import           Yesod.Test
 import           TestImport
 -- Specs
 import           ConfigSpec (configSpec)
+import           FileSpec   (fileSpec)
 
 main :: IO ()
 main =  do
    foundation <- mkTestFoundation
-   hspec $ do
+   hspec $
         yesodSpec foundation $ do
             configSpec
+            fileSpec

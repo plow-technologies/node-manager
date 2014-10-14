@@ -1,0 +1,7 @@
+alarm-state-config:
+  callQueueSize: 100
+  stateFilePath:  "alarmstates"
+  alarmStateHost: 127.0.0.1
+  alarmStatePort: 2233
+
+
