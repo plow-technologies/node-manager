@@ -34,12 +34,11 @@ Library
                        ,simple-store >= 0.1.2
                        ,mtl
                        ,lens
-                       ,warp   
+                       ,warp
+                       ,wreq   
                        ,containers
                        ,unordered-containers >= 0.2.5.0
-                       ,wreq
                        ,yaml
-                      --  ,directory
                        ,system-fileio
                        ,system-filepath
                        ,lens-aeson
@@ -65,11 +64,10 @@ executable node-manager
                      ,mtl
                      ,lens
                      ,warp   
+                     ,wreq
                      ,containers
                      ,unordered-containers >= 0.2.5.0
-                     ,wreq
                      ,yaml
-                     ,directory
                      ,system-fileio
                      ,system-filepath
                      ,lens-aeson
@@ -104,7 +102,6 @@ Test-Suite spec
                       , warp
                       , wreq
                       , yaml
-                     -- , directory
                       , system-fileio
                       , system-filepath
                       , lens-aeson

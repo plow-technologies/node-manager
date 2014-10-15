@@ -115,14 +115,18 @@ postEditConfigureR = do
           let configure = Y.decode file :: Maybe Value
           case configure of
             Nothing -> return . toJSON $ ("" :: String)
-            Just json'' -> do
+            Just json -> do
+              liftIO $ print parsed
+
               let editKeys = makeKeyArr parsed
-                  newjson = rewriteRules json'' editKeys
+              liftIO $ print ("key array")
+              liftIO $ print editKeys
+              let newjson = rewriteRules json editKeys
               return  newjson
 
 
 makeKeyArr :: Value -> [Vedit]
-makeKeyArr = view (key "rewrite-rules" ._JSON)
+makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json)
 
 
 rewriteRules :: Value -> [Vedit] -> Value

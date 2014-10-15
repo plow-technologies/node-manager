@@ -46,7 +46,7 @@ testRetriveRequest :: Value
 testRetriveRequest = object ["configName" .= ("alarm-state-config" :: String)]
 
 testRetriveRequestWRewrite :: Value
-testRetriveRequestWRewrite = object ["configName" .= ("alarm-state-config"::String) , "rewrite-rules" .= object ["key" .= ("port"::String) , "val".= (2000::Int)]]
+testRetriveRequestWRewrite = object ["configName" .= ("alarm-state-config"::String) , "rewrite-rules" .= object ["key" .= ("host"::String) , "val".= (("http://why not working.com")::String)]]
 
 testCopyRequest :: Value
 testCopyRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String)]
