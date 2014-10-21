@@ -75,7 +75,6 @@ getNodeR :: Handler Value
 getNodeR = undefined
 
 
-
 -- | Kill process running on a node
 killNodeR :: Handler Value
 killNodeR = undefined
