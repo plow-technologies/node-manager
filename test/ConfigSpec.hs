@@ -18,12 +18,12 @@ configSpec =  ydescribe "postAddConfigureR" $ do
   ydescribe "postEditConfigureR" $ do
     yit "Return a config using configName, no rewriteRule" $ do
             postBody EditConfigureR (encode testRetriveRequest)
-            printBody >> statusIs 200
+            statusIs 200
 
     yit "Return a config using configName, using rewriteRule" $ do
-            postBody EditConfigureR (encode testRetriveRequest)
-            (do liftIO $ print testRetriveRequestWRewrite
-                printBody) >> statusIs 200
+            postBody EditConfigureR (encode testRetriveRequestWRewrite)
+            bodyContains "why not working.com"
+            statusIs 200
 
   ydescribe "postCopyConfigureR" $
     yit "Requests the copies of all the configs from the node manager" $ do

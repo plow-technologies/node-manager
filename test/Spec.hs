@@ -14,6 +14,7 @@ import           Control.Concurrent (forkIO, killThread)
 import           FileSpec           (fileSpec)
 import           Node.Manager       (defaultConfigStoredPath,
                                      initializeDirectory)
+import Node.Manager.RoutesSpec (routesSpec  )
 import           Yesod              (warp)
 
 main :: IO ()
@@ -25,4 +26,5 @@ main =  do
         yesodSpec foundation $ do
             configSpec
             fileSpec
+            routesSpec
    killThread tId

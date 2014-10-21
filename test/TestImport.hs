@@ -16,19 +16,24 @@ module TestImport
      , testCloneRequest
      , testDeleteRequest
      , testCloneDirRequest
+     , testRewriteTarget
+     , testRewriteResult
+     , testEncodedRewriteRule       
+     , testRewriteRule
      , mkTestFoundation
      ) where
 
 
-import           Control.Monad.IO.Class         as Class
+import           Control.Monad.IO.Class as Class
 import           Data.Aeson
+import           Data.Maybe (fromJust)
+import qualified Data.Yaml as Y
+import           Node.Manager.Client.Types (Vedit (..))
 import           Node.Manager.Routes
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
-import           Yesod                          (getYesod)
+import           Yesod (getYesod)
 import           Yesod.Test
-
-import qualified Data.Yaml                      as Y
 
 mkTestFoundation :: IO NodeManager
 mkTestFoundation = do
@@ -46,10 +51,31 @@ testRetriveRequest :: Value
 testRetriveRequest = object ["configName" .= ("alarm-state-config" :: String)]
 
 testRetriveRequestWRewrite :: Value
-testRetriveRequestWRewrite = object ["configName" .= ("alarm-state-config"::String) , "rewrite-rules" .= object ["key" .= ("host"::String) , "val".= (("http://why not working.com")::String)]]
+testRetriveRequestWRewrite = object [ "configName" .= ("alarm-state-config"::String)
+                                    , "rewrite-rules" .= [object ["key" .= ("host"::String)
+                                                                , "val".= (("http://why not working.com")::String)] ]]
 
 testCopyRequest :: Value
 testCopyRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String)]
+
+testRewriteTarget :: Value
+testRewriteTarget = object ["config" .= (object [("testrule" .= mormon)])]
+  where
+    mormon :: String
+    mormon = "mormon"
+
+testRewriteResult :: Value
+testRewriteResult = object ["config" .= object [("testrule" .= mormon)]]
+  where
+    mormon :: String
+    mormon = "hope floats"
+
+testRewriteRule :: Vedit 
+testRewriteRule = Vedit "testrule" "hope floats"
+
+testEncodedRewriteRule :: Value
+testEncodedRewriteRule = fromJust $ decode "{\"rewrite-rules\":[{\"key\":\"testrule\",\"val\":\"hope floats\"}]}"
+
 
 cloneList :: [String]
 cloneList = ["alarm-state-config"]
@@ -61,7 +87,7 @@ testDeleteRequest :: String
 testDeleteRequest = "alarm-state-config"
 
 testCloneDirRequest :: Value
-testCloneDirRequest = object ["diretoryName" .= ("testConfigsDir"::String)]
+testCloneDirRequest = object ["directoryName" .= ("testConfigsDir"::String)]
 
 type Spec = YesodSpec NodeManager
 type Example = YesodExample NodeManager

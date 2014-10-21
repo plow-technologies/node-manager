@@ -15,7 +15,7 @@ module Node.Manager.Routes where
 import           Control.Exception              hiding (Handler)
 import           Control.Lens
 import           Control.Monad                  (void)
-import           Data.Aeson
+import           Data.Aeson                     (Result (..) )
 import           Data.Aeson.Lens
 import qualified Data.ByteString                as BS
 import qualified Data.ByteString.Lazy           as LBS
@@ -117,20 +117,17 @@ postEditConfigureR = do
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
               liftIO $ print parsed
-
               let editKeys = makeKeyArr parsed
-              liftIO $ print ("key array")
+              liftIO $ print ("key array"::String)
               liftIO $ print editKeys
               let newjson = rewriteRules json editKeys
               return  newjson
 
-
 makeKeyArr :: Value -> [Vedit]
 makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json)
 
-
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
+rewriteRules v ve = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j) v ve 
 
 
 -- | /configure/add AddConfigureR POST
