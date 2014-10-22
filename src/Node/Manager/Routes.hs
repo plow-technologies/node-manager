@@ -1,28 +1,25 @@
-{-# LANGUAGE DeriveDataTypeable        #-}
-{-# LANGUAGE DeriveGeneric             #-}
-{-# LANGUAGE NoImplicitPrelude         #-}
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE OverloadedStrings         #-}
-{-# LANGUAGE QuasiQuotes               #-}
-{-# LANGUAGE RecordWildCards           #-}
-{-# LANGUAGE TemplateHaskell           #-}
-{-# LANGUAGE TypeFamilies              #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies      #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
 module Node.Manager.Routes where
 
-import           Control.Exception              hiding (Handler)
-import           Control.Lens
+import           Control.Exception              (catch, throwIO)
+import           Control.Lens                   (set, traverse, view, views)
 import           Control.Monad                  (void)
 import           Data.Aeson                     (Result (..), ToJSON, Value,
                                                  toJSON)
-import           Data.Aeson.Lens
-import qualified Data.ByteString                as BS
-import qualified Data.ByteString.Lazy           as LBS
-import qualified Data.HashMap.Strict            as HM
+import           Data.Aeson.Lens                (AsValue, key, members, _JSON,
+                                                 _Object, _String)
+import qualified Data.ByteString                as BS (readFile)
+import qualified Data.ByteString.Lazy           as LBS (fromStrict, writeFile)
+import qualified Data.HashMap.Strict            as HM (toList)
 import           Data.List                      (foldl')
-import           Data.Maybe
+import           Data.Maybe                     (catMaybes, listToMaybe)
 import qualified Data.Text                      as T
 import qualified Data.Yaml                      as Y
 import           Filesystem                     as FS
@@ -33,8 +30,8 @@ import           Node.Manager.DIG
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types
 import           Prelude                        hiding (FilePath, readFile)
-import           SimpleStore
-import           System.IO.Error
+import           SimpleStore                    (createCheckpoint)
+import           System.IO.Error                (isDoesNotExistError)
 import           Yesod.Core                     (Yesod, getYesod, liftIO,
                                                  mkYesodDispatch, parseJsonBody,
                                                  sendResponseStatus)
@@ -102,6 +99,25 @@ unregisterNodeR :: Handler Value
 unregisterNodeR = undefined
 
 -- Node Management API End
+makeKeyArr :: Value -> [Vedit]
+makeKeyArr = view ( key "rewrite-rules" ._JSON )
+
+rewriteRules :: Value -> [Vedit] -> Value
+rewriteRules  = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
+
+writeConfigFile :: (AsValue s, ToJSON s) => s -> IO ()
+writeConfigFile parsed' = do
+  let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
+  case mTitle of
+        Nothing -> putStrLn "Could not find field config name"
+        Just title -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
+
+removeExisting :: FilePath -> IO()
+removeExisting file = removeFile file `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e
+
 
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
@@ -110,27 +126,15 @@ postEditConfigureR = do
   case rParsed of
     Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed -> do
-      let ptitle = views (key "configName" . _String) T.unpack parsed
-      case ptitle of
+      case views (key "configName" . _String) T.unpack parsed of
         "" -> sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         title -> do
           file <- liftIO $ BS.readFile $ "./configs/" ++ title ++ ".yml"
-          let configure = Y.decode file :: Maybe Value
-          case configure of
+          case (Y.decode file :: Maybe Value) of
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
-              liftIO $ print parsed
               let editKeys = makeKeyArr parsed
-              liftIO $ print ("key array"::String)
-              liftIO $ print editKeys
-              let newjson = rewriteRules json editKeys
-              return  newjson
-
-makeKeyArr :: Value -> [Vedit]
-makeKeyArr = view ( key "rewrite-rules" ._JSON )
-
-rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules v ve = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j) v ve
+              return $ rewriteRules json editKeys
 
 
 -- | /configure/add AddConfigureR POST
@@ -161,13 +165,7 @@ postDeleteConfigureR = do
            liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title ++ ".yml")
            return . toJSON $ ("Success! " ++ title ++ " was removed..")
 
-
-removeExisting :: FilePath -> IO()
-removeExisting file = removeFile file `catch` handleExists
-  where handleExists e
-          | isDoesNotExistError e = return ()
-          | otherwise = throwIO e
-
+-- | /configure/copy CopyConfigureR POST
 postCopyConfigureR :: Handler Value
 postCopyConfigureR = do
   parsed <- parseJsonBody :: Handler (Result Value)
@@ -188,14 +186,7 @@ postCopyConfigureR = do
               void $ liftIO $ traverse (post target) jsonList
               return . toJSON $ ("Copy Success" :: String)
 
-writeConfigFile :: (AsValue s, ToJSON s) => s -> IO ()
-writeConfigFile parsed' = do
-  let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
-  case mTitle of
-        Nothing -> print ( "Could not find field config name" :: T.Text)
-        Just title -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
-
-
+-- | /configure/clone/diretory CloneDiretoryR POST
 postCloneDiretoryR :: Handler Value
 postCloneDiretoryR = do
    parsed <- parseJsonBody :: Handler (Result Value)
@@ -227,7 +218,6 @@ getConfigureR = do
               fileList <- liftIO $ traverse readFile allConfigPaths
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               return . toJSON $ jsonList
-
 
 
 -- buildFilePaths :: [String] -> IO [FilePath]
