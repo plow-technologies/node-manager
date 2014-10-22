@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Node.Manager.Types.SimpleStore  where
+module Node.Manager.Types.SimpleStore  (NodeManagerCellStore (..), initNodeManagerCellStore
+                                       , initializeSimpleStore, Name, returnNodes, getNode, insertNode,deleteNode ) where
 
 -- General
 import           GHC.Generics              (Generic)

@@ -1,5 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+        {-# LANGUAGE TemplateHaskell #-}
 
 module Node.Manager.Lens where
 

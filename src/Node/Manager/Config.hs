@@ -1,21 +1,20 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
 {-# LANGUAGE OverloadedStrings  #-}
+
 module Node.Manager.Config  (  readNodeManagerConf
                              , MyHostPreference (..)
                              , NodeManagerConfig (..)
                             )where
 
 -- General
-import           Control.Monad
-import qualified Data.ByteString                 as BS
-import           Data.Streaming.Network.Internal
-import           Data.Text
-import           Data.Typeable
-import qualified Filesystem.Path.CurrentOS       as OS
-import           GHC.Generics
-import           Prelude
+import qualified Data.ByteString                 as BS (readFile)
+import           Data.Streaming.Network.Internal (HostPreference (..))
+import           Data.Text                       (Text, pack, unpack)
+import           Data.Typeable                   (Typeable)
+import qualified Filesystem.Path.CurrentOS       as OS (FilePath, encodeString)
+import           GHC.Generics                    (Generic)
+
 -- Yaml
 import           Data.Yaml
 

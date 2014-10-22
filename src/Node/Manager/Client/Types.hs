@@ -10,12 +10,13 @@ module Node.Manager.Client.Types (NodeProcess (..)
                                  ) where
 
 import           Control.Applicative ((<$>), (<*>))
-import           Data.Aeson
+import           Data.Aeson          (FromJSON, ToJSON, Value (Object), object,
+                                      parseJSON, toJSON, (.:), (.=))
 import           Data.Serialize      (Serialize, get, put)
 import           Data.Text           (Text)
 import           Data.Text.Encoding  (decodeUtf8, encodeUtf8)
 import           Data.Typeable       (Typeable)
-import           GHC.Generics
+import           GHC.Generics        (Generic)
 
 data CheckType = GET | POST
                deriving (Eq,Show,Generic,Typeable)

@@ -30,10 +30,10 @@ configSpec =  ydescribe "postAddConfigureR" $ do
             postBody CopyConfigureR (encode testCopyRequest)
             printBody >> statusIs 200
 
-  -- ydescribe "postDeleteConfigureR" $
-  --   yit "Delete a configure using a configure name" $ do
-  --           postBody DeleteConfigureR (encode testDeleteRequest)
-  --           printBody >> statusIs 200
+  ydescribe "postDeleteConfigureR" $
+    yit "Delete a configure using a configure name" $ do
+            postBody DeleteConfigureR (encode testDeleteRequest)
+            printBody >> statusIs 200
 
 
 

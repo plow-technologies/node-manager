@@ -1,4 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Node.Manager.DIG (
@@ -9,11 +8,11 @@ module Node.Manager.DIG (
                         ) where
 
 -- General
-import           Control.Lens
-import           Control.Monad        (void)
-import           Node.Manager.Lens
-import           Node.Manager.Types
-import           Prelude
+import           Control.Lens         (over, set, views)
+import           Node.Manager.Lens    (checkBody_)
+import           Node.Manager.Types   (ClientNodeProc, NodeManagerCellStore,
+                                       StorableNodeProc, deleteNode, getNode,
+                                       getNodes, insertNode, returnNodes)
 import           SimpleStore          (SimpleStore)
 -- Serialization
 import           Data.Aeson
@@ -38,15 +37,14 @@ makeClientProcess txtNodeproc = case views checkBody_ (eitherDecode' . BL.fromSt
 insertStoredNode :: SimpleStore NodeManagerCellStore -> ClientNodeProc -> IO ()
 insertStoredNode st cnp = do
      let snp = makeStorableProcess cnp
-     void $ insertNode st snp
+     insertNode st snp
 
 deleteStoredNode :: SimpleStore NodeManagerCellStore -> Text -> IO ()
-deleteStoredNode st name = void $ deleteNode st name
+deleteStoredNode  = deleteNode
 
 getStoredNode :: SimpleStore (Map Text StorableNodeProc) -> Text -> IO (Either Text ClientNodeProc)
 getStoredNode st name = do
       rslt <- getNode st name
-      -- return maybe (append name "not found") (makeCientProcess)
       maybe (return $ Left (append name "not found")) (return . makeClientProcess) rslt
 
 fetchStoredNodes :: SimpleStore NodeManagerCellStore -> IO (Map Text (Either Text ClientNodeProc))
