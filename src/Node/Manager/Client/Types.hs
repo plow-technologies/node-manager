@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
 {-# LANGUAGE OverloadedStrings  #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -10,15 +9,13 @@ module Node.Manager.Client.Types (NodeProcess (..)
                                  , Vedit (..)
                                  ) where
 
-import           Control.Applicative
-import           Control.Monad       (fail)
+import           Control.Applicative ((<$>), (<*>))
 import           Data.Aeson
-import           Data.Serialize
-import           Data.Text
-import           Data.Text.Encoding
-import           Data.Typeable
+import           Data.Serialize      (Serialize, get, put)
+import           Data.Text           (Text)
+import           Data.Text.Encoding  (decodeUtf8, encodeUtf8)
+import           Data.Typeable       (Typeable)
 import           GHC.Generics
-import           Prelude             (Eq, Int, Show, fmap, ($))
 
 data CheckType = GET | POST
                deriving (Eq,Show,Generic,Typeable)

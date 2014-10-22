@@ -21,17 +21,17 @@ Library
                         Node.Manager.Routes
                         Node.Manager.Routes.Foundation
                         Node.Manager.DIG
-                        Node.Manager.TH
   
   Build-Depends:        http-types >= 0.8.5,
                         transformers >= 0.4.1.0,
                         base >= 4 && < 5
-                       ,yesod
+                       ,yesod-core
                        ,text
                        ,aeson
                        ,async               
                        ,bytestring        
                        ,simple-store >= 0.1.2
+                       ,plow-extras-lens >= 0.1.1
                        ,mtl
                        ,lens
                        ,warp
@@ -55,18 +55,19 @@ executable node-manager
   Build-Depends:      http-types >= 0.8.5,
                       transformers >= 0.4.1.0,
                       base >= 4 && < 5
-                     ,yesod
+                     ,yesod-core
                      ,text
                      ,aeson
                      ,async               
                      ,bytestring        
-                     ,simple-store >= 0.1.2
+                     ,simple-store 
+                     ,plow-extras-lens
                      ,mtl
                      ,lens
                      ,warp   
                      ,wreq
                      ,containers
-                     ,unordered-containers >= 0.2.5.0
+                     ,unordered-containers
                      ,yaml
                      ,system-fileio
                      ,system-filepath
@@ -88,14 +89,15 @@ Test-Suite spec
                       , http-types
                       , transformers
                       , hspec
-                      , yesod
+                      , yesod-core
                       , yesod-test
                       , async
                       , simple-store
+                      , plow-extras-lens
                       , bytestring 
                       , mtl
                       , containers
-                      , unordered-containers >= 0.2.5.0
+                      , unordered-containers
                       , text
                       , aeson
                       , lens

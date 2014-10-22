@@ -3,8 +3,8 @@
 
 module Node.Manager.Lens where
 
-import           Node.Manager.Client.Types
-import           Node.Manager.TH
+import           Node.Manager.Client.Types (NodeProcess (..))
+import           Plow.Extras.Lens          (makeLenses_)
 
 makeLenses_ ''NodeProcess
 

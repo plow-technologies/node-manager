@@ -2,7 +2,7 @@
 
 module TestImport
     (  module Yesod.Test
-     , module Yesod
+     , module Yesod.Core
      , module Node.Manager.Routes.Foundation
      , module Node.Manager.Routes
      , module Data.Aeson
@@ -25,14 +25,15 @@ module TestImport
 
 
 import           Control.Monad.IO.Class         as Class
-import           Data.Aeson
+import           Data.Aeson                     (Value, decode, encode, object,
+                                                 (.=))
 import           Data.Maybe                     (fromJust)
-import qualified Data.Yaml                      as Y
+import qualified Data.Yaml                      as Y (decodeFile)
 import           Node.Manager.Client.Types      (Vedit (..))
 import           Node.Manager.Routes
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
-import           Yesod                          (getYesod)
+import           Yesod.Core                     (getYesod, warp)
 import           Yesod.Test
 
 mkTestFoundation :: IO NodeManager
@@ -59,13 +60,13 @@ testCopyRequest :: Value
 testCopyRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String)]
 
 testRewriteTarget :: Value
-testRewriteTarget = object ["config" .= (object [("testrule" .= mormon)])]
+testRewriteTarget = object ["config" .= object ["testrule" .= mormon]]
   where
     mormon :: String
     mormon = "mormon"
 
 testRewriteResult :: Value
-testRewriteResult = object ["config" .= object [("testrule" .= mormon)]]
+testRewriteResult = object ["config" .= object ["testrule" .= mormon]]
   where
     mormon :: String
     mormon = "hope floats"

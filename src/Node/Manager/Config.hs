@@ -2,13 +2,9 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE NoImplicitPrelude  #-}
 {-# LANGUAGE OverloadedStrings  #-}
-module Node.Manager.Config  (  getHostPreference
-                             , managerFilePath
-                             , nodeManagerHost
-                             , nodeManagerPort
-                             , readNodeManagerConf
-                             , MyHostPreference
-                             , NodeManagerConfig
+module Node.Manager.Config  (  readNodeManagerConf
+                             , MyHostPreference (..)
+                             , NodeManagerConfig (..)
                             )where
 
 -- General

@@ -1,35 +1,34 @@
 {-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeFamilies      #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Node.Manager.Types.SimpleStore  where
 
 -- General
-import           GHC.Generics
-import           Prelude                   hiding (FilePath, lookup)
+import           GHC.Generics              (Generic)
 -- Serialization
-import           Data.Serialize
-import           Data.Text                 hiding (empty)
+import           Data.Serialize            (Serialize)
+import           Data.Text                 (Text)
 -- Containers
-import           Data.ByteString           hiding (empty)
-import           Data.Map.Strict
+import           Data.ByteString           (ByteString)
+import qualified Data.Map.Strict           as M (Map, delete, empty, insert,
+                                                 lookup)
 -- Local
-import           Filesystem.Path.CurrentOS (FilePath)
-import           Node.Manager.Client
-import           SimpleStore
+import qualified Filesystem.Path.CurrentOS as OS (FilePath)
+import           Node.Manager.Client       (NodeProcess, checkName)
+import           SimpleStore               (SimpleStore (SimpleStore),
+                                            getSimpleStore, makeSimpleStore,
+                                            putSimpleStore)
 
 newtype NodeManagerCellStore = NodeManagerCellStore {
-  getNodes :: Map Text (NodeProcess ByteString)
+  getNodes :: M.Map Text (NodeProcess ByteString)
 } deriving (Generic)
 
 instance Serialize NodeManagerCellStore where
 
 initNodeManagerCellStore :: NodeManagerCellStore
-initNodeManagerCellStore = NodeManagerCellStore { getNodes = empty}
+initNodeManagerCellStore = NodeManagerCellStore { getNodes = M.empty}
 
-initializeSimpleStore ::FilePath -> IO (SimpleStore NodeManagerCellStore)
+initializeSimpleStore :: OS.FilePath -> IO (SimpleStore NodeManagerCellStore)
 initializeSimpleStore fpr = do
    enmCellStore <- makeSimpleStore fpr initNodeManagerCellStore
    either (\_ -> fail "SimpleStore won't initialize" ) return  enmCellStore
@@ -40,20 +39,20 @@ type Name = Text
 returnNodes :: SimpleStore st -> IO st
 returnNodes = getSimpleStore
 
-getNode :: Ord k => SimpleStore (Map k a) -> k -> IO (Maybe a)
+getNode :: Ord k => SimpleStore (M.Map k a) -> k -> IO (Maybe a)
 getNode st name = do
      nodes <- getSimpleStore st
-     return $ lookup name nodes
+     return $ M.lookup name nodes
 
 insertNode :: SimpleStore NodeManagerCellStore -> NodeProcess ByteString -> IO ()
 insertNode st node = do
      nodes <- getSimpleStore st
-     putSimpleStore st (NodeManagerCellStore (insert (checkName node) node (getNodes nodes)))
+     putSimpleStore st (NodeManagerCellStore (M.insert (checkName node) node (getNodes nodes)))
 
 deleteNode :: SimpleStore NodeManagerCellStore -> Text -> IO ()
 deleteNode st name = do
      nodes <- getSimpleStore st
-     putSimpleStore st (NodeManagerCellStore (delete name (getNodes nodes)))
+     putSimpleStore st (NodeManagerCellStore (M.delete name (getNodes nodes)))
 
 
 

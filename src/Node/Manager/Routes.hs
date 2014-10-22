@@ -15,7 +15,8 @@ module Node.Manager.Routes where
 import           Control.Exception              hiding (Handler)
 import           Control.Lens
 import           Control.Monad                  (void)
-import           Data.Aeson                     (Result (..) )
+import           Data.Aeson                     (Result (..), ToJSON, Value,
+                                                 toJSON)
 import           Data.Aeson.Lens
 import qualified Data.ByteString                as BS
 import qualified Data.ByteString.Lazy           as LBS
@@ -34,7 +35,9 @@ import           Node.Manager.Types
 import           Prelude                        hiding (FilePath, readFile)
 import           SimpleStore
 import           System.IO.Error
-import           Yesod
+import           Yesod.Core                     (Yesod, getYesod, liftIO,
+                                                 mkYesodDispatch, parseJsonBody,
+                                                 sendResponseStatus)
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 
@@ -69,7 +72,7 @@ postAddNewR = do
       void $ liftIO $ createCheckpoint nodeState
       return . toJSON $ nodes'
 
-
+-- API for Node Management
 -- | get Status of a single node
 getNodeR :: Handler Value
 getNodeR = undefined
@@ -98,6 +101,7 @@ registerNodeR = undefined
 unregisterNodeR :: Handler Value
 unregisterNodeR = undefined
 
+-- Node Management API End
 
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
@@ -123,10 +127,10 @@ postEditConfigureR = do
               return  newjson
 
 makeKeyArr :: Value -> [Vedit]
-makeKeyArr json = (view ( key "rewrite-rules" ._JSON )  json)
+makeKeyArr = view ( key "rewrite-rules" ._JSON )
 
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules v ve = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j) v ve 
+rewriteRules v ve = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j) v ve
 
 
 -- | /configure/add AddConfigureR POST
@@ -198,7 +202,7 @@ postCloneDiretoryR = do
    case parsed of
     Error e -> sendResponseStatus status501 (toJSON e)
     Success parsed' -> do
-      let pTarget = views (key "diretoryName" . _String) T.unpack parsed'
+      let pTarget = views (key "directoryName" . _String) T.unpack parsed'
       case pTarget of
         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy an empty diretory" :: T.Text))
         target -> do

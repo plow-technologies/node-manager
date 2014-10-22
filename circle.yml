@@ -16,14 +16,14 @@ dependencies:
     - cabal update
     - if [-f ./.cabal-sandbox/packages]; then rm .cabal-sandbox/packages/*; fi
     - cabal sandbox init
-    - cabal install --only-dependencies --enable-tests
+    - cabal install --only-dependencies --enable-tests -j2
     - if [ "$CIRCLE_BRANCH" == "production" ]; then yesod configure && echo "configuring for production build"; else cabal configure -fdev && echo "configuring non-production build"; fi
 
 test:
   override:
-    - cabal build:
+    - cabal build -j2:
         timeout: 3000
-    - cabal test --show-details=always:
+    - cabal test -j8 --show-details=always:
         timeout: 3000
 
 # deployment:
