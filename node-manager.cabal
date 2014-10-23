@@ -52,9 +52,9 @@ executable node-manager
   main-is:            Main.hs
   Default-Language:   Haskell2010
   hs-source-dirs:     src
-  Build-Depends:      http-types >= 0.8.5,
-                      transformers >= 0.4.1.0,
-                      base >= 4 && < 5
+  Build-Depends:      http-types,
+                      transformers,
+                      base 
                      ,yesod-core
                      ,text
                      ,aeson
