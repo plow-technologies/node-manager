@@ -30,4 +30,4 @@ deployment:
   staging:
     branch: master
     commands:
-      - cd ~/dist/build/node-manager/ && rsync -avz -e ssh node-manager scott@54.69.197.241:/home/scott/node/node-manager/bin/
+      - cd ./dist/build/node-manager/ && rsync -avz -e ssh node-manager scott@54.69.197.241:/home/scott/node/node-manager/bin/
