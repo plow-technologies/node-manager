@@ -17,7 +17,7 @@ import           Filesystem.Path                (absolute, (</>))
 import qualified Filesystem.Path.CurrentOS      as OS (FilePath, fromText)
 import           Network.Wai.Handler.Warp       (defaultSettings, runSettings,
                                                  setHost, setPort, setTimeout)
-import           Node.Manager.Config            (NodeManagerConfig (..),
+import           Node.Client.Configs            (NodeManagerConfig (..),
                                                  getHostPreference,
                                                  readNodeManagerConf)
 import           Node.Manager.Routes            ()

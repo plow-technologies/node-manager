@@ -17,14 +17,11 @@ Library
                         Node.Manager.Client
   Other-Modules:        Node.Manager.Types
                         Node.Manager.Types.SimpleStore
-                        Node.Manager.Config
                         Node.Manager.Routes
                         Node.Manager.Routes.Foundation
                         Node.Manager.DIG
   
-  Build-Depends:        http-types >= 0.8.5,
-                        transformers >= 0.4.1.0,
-                        base >= 4 && < 5
+  Build-Depends:        base >= 4 && < 5
                        ,yesod-core
                        ,text
                        ,aeson
@@ -32,12 +29,15 @@ Library
                        ,bytestring        
                        ,simple-store >= 0.1.2
                        ,plow-extras-lens >= 0.1.1
+                       ,node-client-configs >= 0.1.2
                        ,mtl
                        ,lens
                        ,warp
                        ,wreq   
                        ,containers
                        ,unordered-containers >= 0.2.5.0
+                       ,http-types >= 0.8.5
+                       ,transformers >= 0.4.1.0
                        ,yaml
                        ,system-fileio
                        ,system-filepath
@@ -46,15 +46,14 @@ Library
                        ,template-haskell
                        ,streaming-commons
                        ,unix
+                        
 
 
 executable node-manager
   main-is:            Main.hs
   Default-Language:   Haskell2010
   hs-source-dirs:     src
-  Build-Depends:      http-types,
-                      transformers,
-                      base 
+  Build-Depends:      base 
                      ,yesod-core
                      ,text
                      ,aeson
@@ -62,6 +61,7 @@ executable node-manager
                      ,bytestring        
                      ,simple-store 
                      ,plow-extras-lens
+                     ,node-client-configs
                      ,mtl
                      ,lens
                      ,warp   
@@ -69,6 +69,8 @@ executable node-manager
                      ,containers
                      ,unordered-containers
                      ,yaml
+                     ,http-types
+                     ,transformers
                      ,system-fileio
                      ,system-filepath
                      ,lens-aeson
@@ -86,14 +88,13 @@ Test-Suite spec
   Ghc-Options:          -Wall -fno-warn-orphans
   Main-Is:              Spec.hs
   Build-Depends:        base
-                      , http-types
-                      , transformers
                       , hspec
                       , yesod-core
                       , yesod-test
                       , async
                       , simple-store
                       , plow-extras-lens
+                      , node-client-configs
                       , bytestring 
                       , mtl
                       , containers
@@ -104,6 +105,8 @@ Test-Suite spec
                       , warp
                       , wreq
                       , yaml
+                      , http-types 
+                      , transformers
                       , system-fileio
                       , system-filepath
                       , lens-aeson
