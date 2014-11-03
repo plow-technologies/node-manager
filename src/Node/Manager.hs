@@ -85,6 +85,7 @@ initializeDirectory dir = do
 startNodeManager :: IO ()
 startNodeManager = do
   nc <- readNodeManagerConf defaultNodeManagerConfPath
+  ePrint ("Node Manager Configuraton :"::Text) >> ePrint nc
   nmFoundation <- buildNodeManager nc
   initializeDirectory defaultConfigStoredPath
   finally (
