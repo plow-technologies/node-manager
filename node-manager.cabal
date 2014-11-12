@@ -12,7 +12,7 @@ Build-Type:             Simple
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
-  GHC-Options:          -threaded -O2 -rtsopts -Wall
+  GHC-Options:          -Wall
   Exposed-Modules:      Node.Manager
                         Node.Manager.Client
   Other-Modules:        Node.Manager.Types
@@ -78,6 +78,8 @@ executable node-manager
                      ,template-haskell
                      ,streaming-commons
                      ,unix
+
+  ghc-options:       -threaded -O2 -rtsopts -Wall 
 
 
 Test-Suite spec
