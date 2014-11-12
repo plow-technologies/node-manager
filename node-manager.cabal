@@ -27,17 +27,17 @@ Library
                        ,aeson
                        ,async               
                        ,bytestring        
-                       ,simple-store >= 0.1.2
-                       ,plow-extras-lens >= 0.1.1
-                       ,node-client-configs >= 0.1.2
+                       ,simple-store          >= 0.1.3
+                       ,plow-extras-lens      >= 0.1.1
+                       ,node-client-configs   >= 0.1.2
                        ,mtl
                        ,lens
                        ,warp
                        ,wreq   
                        ,containers
-                       ,unordered-containers >= 0.2.5.0
-                       ,http-types >= 0.8.5
-                       ,transformers >= 0.4.1.0
+                       ,unordered-containers  >= 0.2.5.0
+                       ,http-types            >= 0.8.5
+                       ,transformers          >= 0.4.1.0
                        ,yaml
                        ,system-fileio
                        ,system-filepath
