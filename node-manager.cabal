@@ -31,7 +31,7 @@ Library
                        ,plow-extras-lens      >= 0.1.1
                        ,node-client-configs   >= 0.1.2
                        ,mtl
-                       ,lens
+                       ,lens                  >= 4.4 && < 4.5
                        ,warp
                        ,wreq   
                        ,containers
@@ -46,6 +46,7 @@ Library
                        ,template-haskell
                        ,streaming-commons
                        ,unix
+                       ,blaze-html
                         
 
 
@@ -78,6 +79,7 @@ executable node-manager
                      ,template-haskell
                      ,streaming-commons
                      ,unix
+                     ,blaze-html
 
   ghc-options:       -threaded -O2 -rtsopts -Wall 
 

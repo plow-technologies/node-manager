@@ -29,12 +29,16 @@ import           Network.Wreq
 import           Node.Manager.DIG
 import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types
-import           Prelude                        hiding (FilePath, readFile)
+import           Prelude                        hiding (FilePath, div, head,
+                                                 readFile)
 import           SimpleStore                    (createCheckpoint)
 import           System.IO.Error                (isDoesNotExistError)
 import           Yesod.Core                     (Yesod, getYesod, liftIO,
                                                  mkYesodDispatch, parseJsonBody,
                                                  sendResponseStatus)
+
+import           Text.Blaze.Html5               (Html, body, head, p, title)
+-- import qualified Text.Blaze.Html5.Attributes    as A
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
 
@@ -44,15 +48,32 @@ instance Yesod NodeManager
 --  maximumContentLength _ (Just (AlarmDataR )) = Just $ 2 * 1024 * 1024 * 1024
 --  maximumContentLength _ _ = Just $ 2 * 1024 * 1024
 
+documentation :: Html
+documentation = do
+    head $ do
+        title "Node Manager"
+    body $ do
+        p $ "Node Manager Documentation"
+        p $ "Site Navigation: "
+        p $ "/configure/get            -- Show all the Config Files              -- Eg:  post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2)]]))"
+        p $ "/configure/edit           -- Edit the Config File                   -- Eg: post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2000), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2000)]]))"
+        p $ "/configure/delete                                                   -- Delete the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/edit' (toJSON $ object ['configName' .= 'alarm-state-config', 'rewrite-rules' .= (object [('key' .= 'port') , ('val' .= 2)])])"
+        p $ "/configure/copy                                                     -- Copy the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/delete' (toJSON 'alarm-state-config')"
+        p $ "Production Node Manager        -- 108.168.240.123:2533"
+        p $ "Staging Node Manager           -- 54.69.197.241:2733"
+        p $ "LocalHost Node Manager         -- 54.69.197.241:2833"
+        p $ "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
+
 
 -- | return all the monitored nodes
 -- | / HomeR GET
 
-getHomeR :: Handler Value
+getHomeR :: Handler Html
 getHomeR = do
   (NodeManager{nodes=nodeState}) <- getYesod
   nodes' <- liftIO $ fetchStoredNodes nodeState
-  return . toJSON $ nodes'
+  return documentation
+  -- return . toJSON $ nodes'
 
 
 -- | insert a new nodeprocess to monitor
@@ -117,7 +138,6 @@ removeExisting file = removeFile file `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
           | otherwise = throwIO e
-
 
 -- | /configure/edit EditConfigureR POST
 postEditConfigureR :: Handler Value
