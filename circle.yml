@@ -11,8 +11,9 @@ dependencies:
     - "if [ ! -f /home/ubuntu/.cabal/config ]; then cabal update && echo remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive >> ~/.cabal/config; else echo .cabal/config file already exists; fi"
     - cabal update
     - if [-f ./.cabal-sandbox/packages]; then rm .cabal-sandbox/packages/*; fi
+    - cabal sandbox delete
     - cabal sandbox init
-    - cabal install --only-dependencies --enable-tests -j2
+    - cabal install --only-dependencies --enable-tests -j2 --force-reinstalls
     - if [ "$CIRCLE_BRANCH" == "production" ]; then yesod configure && echo "configuring for production build"; else cabal configure -fdev && echo "configuring non-production build"; fi
 
 test:
