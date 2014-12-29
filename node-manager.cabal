@@ -33,7 +33,7 @@ Library
                        ,mtl
                        ,lens                  >= 4.4 && < 4.5
                        ,warp
-                       ,wreq   
+                       ,wreq                  >= 2.0 && < 3.0
                        ,containers
                        ,unordered-containers  >= 0.2.5.0
                        ,http-types            >= 0.8.5
