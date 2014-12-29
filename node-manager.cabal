@@ -118,6 +118,7 @@ Test-Suite spec
                       , template-haskell
                       , streaming-commons
                       , unix 
+                      , blaze-html
                       
 Source-Repository head
   Type:                 git
