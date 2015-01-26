@@ -31,14 +31,14 @@ deployment:
     branch: master
     commands:
       - cd ./dist/build/node-manager/ && rsync -avz -e ssh node-manager scott@54.69.197.241:/home/scott/node/node-manager/bin/:
-        timeout: 3000
+          timeout: 3000
       - ssh scott@54.69.197.241 "./deploy/deploy_node-manager.sh && killall node-manager":
-         timeout: 3000
+          timeout: 3000
          
   production:
     branch: production
     commands:
       - cd ./dist/build/node-manager/ && rsync -avz -e ssh node-manager node@108.168.240.123:/home/node/node-manager/bin/:
-        timeout: 3000
+          timeout: 3000
       - ssh scott@108.168.240.123 "./deploy/deploy_node-manager.sh && killall node-manager":
-         timeout: 3000
+          timeout: 3000
