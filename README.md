@@ -14,7 +14,7 @@ Simple commands let the user control lots of different types of processes.
 
 Pushing to the master branch causes circleci to build the new binary for node-manager, if it passes, it then sends it to staging, restarts the process, and makes a copy with the date to the release history folder on that server.
 
-Pushing to the production branch causes circleci to build the new binary for audit-trail, if it passes, it then sends it to production, restarts the process and makes a copy with the date to the release history folder on that server.
+Pushing to the production branch causes circleci to build the new binary for node-manager, if it passes, it then sends it to production, restarts the process and makes a copy with the date to the release history folder on that server.
 
 ## Using to configure Nodes
 
