@@ -11,8 +11,7 @@ dependencies:
     - dist
 
   override:
-    - "if [ ! -f /home/ubuntu/.cabal/config ]; then cabal update && echo remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive >> ~/.cabal/config; else echo .cabal/config file already exists; fi"
-    - "echo remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive >> ~/.cabal/config"
+    - "if grep -Fxq 'remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive' ~/.cabal/config; then echo 'Already in config file'; else echo remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive >> ~/.cabal/config; fi"
     - cabal update
     - if [-f ./.cabal-sandbox/packages]; then rm .cabal-sandbox/packages/*; fi
     - cabal sandbox init
