@@ -26,10 +26,7 @@ import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
 import           SimpleStore                    (closeSimpleStore,
                                                  createCheckpoint)
 import           System.IO                      (hPrint, stderr)
-import           System.Posix.Resource          (Resource (ResourceOpenFiles),
-                                                 ResourceLimit (ResourceLimit),
-                                                 getResourceLimit, hardLimit,
-                                                 softLimit)
+
 import           Yesod.Core.Dispatch            (toWaiApp)
 
 -- Default Node Manager Config Path
@@ -40,13 +37,6 @@ defaultNodeManagerConfPath = OS.fromText ("node-manager-config.yml"::Text)
 defaultConfigStoredPath :: OS.FilePath
 defaultConfigStoredPath = OS.fromText ("./configs"::Text)
 
--- Get Files Limit
-getNumFilesLimit :: IO (Integer, Integer)
-getNumFilesLimit = do
-  lm <- getResourceLimit ResourceOpenFiles
-  let (ResourceLimit sl) = softLimit lm
-      (ResourceLimit hl) = hardLimit lm
-  return (sl,hl)
 
 -- Print error to stand output
 ePrint :: Show a => a -> IO ()
@@ -55,7 +45,6 @@ ePrint = hPrint stderr
 -- Build Node Manger Yesod Fundation
 buildNodeManager :: NodeManagerConfig ->  IO NodeManager
 buildNodeManager nc  =  do
-  getNumFilesLimit >>= print
   putStrLn "NodeManager Initializing ..."
   putStrLn  "Initializing store"
   nmcs <- initializeSimpleStore . OS.fromText .  managerFilePath $ nc

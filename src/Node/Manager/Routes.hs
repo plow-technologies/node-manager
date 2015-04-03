@@ -65,17 +65,19 @@ documentation = do
         p $ "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
 
 
--- | return all the monitored nodes
--- | / HomeR GET
-
-getHomeR :: Handler Html
-getHomeR = do
-  (NodeManager{nodes=nodeState}) <- getYesod
-  nodes' <- liftIO $ fetchStoredNodes nodeState
+-- | return documents for node-manager
+-- | / DocumentationAtHomeR GET 
+getDocumentationAtHomeR :: Handler Html
+getDocumentationAtHomeR = do
   return documentation
   -- return . toJSON $ nodes'
 
-
+-- | /nodes/fetch/all AllNodesR GET
+getAllNodesR :: Handler Value
+getAllNodesR = do
+  (NodeManager{nodes=nodeState}) <- getYesod
+  nodesToReturn <- liftIO $ fetchStoredNodes nodeState
+  return . toJSON $ nodesToReturn
 -- | insert a new nodeprocess to monitor
 -- | /nodes/add AddNewR POST
 
@@ -120,9 +122,19 @@ unregisterNodeR :: Handler Value
 unregisterNodeR = undefined
 
 -- Node Management API End
+--------------------------------------------------
+--------------------------------------------------
+-- | Configuration API       
+
+
+-- | make a list of rewrite rules
+-- fromJSON   
 makeKeyArr :: Value -> [Vedit]
 makeKeyArr = view ( key "rewrite-rules" ._JSON )
 
+-- | Take a Value and run through it one level, replacing anyting found with the incoming rewrite
+-- rule
+   
 rewriteRules :: Value -> [Vedit] -> Value
 rewriteRules  = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
 
@@ -139,7 +151,10 @@ removeExisting file = removeFile file `catch` handleExists
           | isDoesNotExistError e = return ()
           | otherwise = throwIO e
 
+
 -- | /configure/edit EditConfigureR POST
+-- This is how you use the edit route for rewrite rules
+-- curl -d "{\"configName\":\"alarmDBConfig\" , \"rewrite-rules\":[{\"key\":\"url\" , \"val\":\"555\"}]}" localhost:2733/configure/edit   
 postEditConfigureR :: Handler Value
 postEditConfigureR = do
   rParsed <- parseJsonBody :: Handler (Result Value)
@@ -181,9 +196,9 @@ postDeleteConfigureR = do
       let pTitle = views _String T.unpack parsed'
       case pTitle of
         "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
-        title -> do
-           liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title ++ ".yml")
-           return . toJSON $ ("Success! " ++ title ++ " was removed..")
+        title' -> do
+           liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title' ++ ".yml")
+           return . toJSON $ ("Success! " ++ title' ++ " was removed..")
 
 -- | /configure/copy CopyConfigureR POST
 postCopyConfigureR :: Handler Value
