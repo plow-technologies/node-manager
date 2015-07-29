@@ -27,7 +27,7 @@ Library
                        ,aeson
                        ,async               
                        ,bytestring        
-                       ,simple-store          >= 0.1.3
+                       ,simple-store          >= 0.1.3 && <= 0.2.0
                        ,plow-extras-lens      >= 0.1.1
                        ,node-client-configs   >= 0.1.2
                        ,mtl                  
