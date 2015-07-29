@@ -38,6 +38,7 @@ import           Yesod.Core                     (Yesod, getYesod, liftIO,
                                                  sendResponseStatus)
 
 import           Text.Blaze.Html5               (Html, body, head, p, title)
+import           Servant
 -- import qualified Text.Blaze.Html5.Attributes    as A
 
 mkYesodDispatch "NodeManager" resourcesNodeManager
@@ -53,88 +54,37 @@ documentation = do
     head $ do
         title "Node Manager"
     body $ do
-        p $ "Node Manager Documentation"
-        p $ "Site Navigation: "
-        p $ "/configure/get            -- Show all the Config Files              -- Eg:  post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2)]]))"
-        p $ "/configure/edit           -- Edit the Config File                   -- Eg: post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2000), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2000)]]))"
-        p $ "/configure/delete                                                   -- Delete the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/edit' (toJSON $ object ['configName' .= 'alarm-state-config', 'rewrite-rules' .= (object [('key' .= 'port') , ('val' .= 2)])])"
-        p $ "/configure/copy                                                     -- Copy the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/delete' (toJSON 'alarm-state-config')"
-        p $ "Production Node Manager        -- 108.168.240.123:2533"
-        p $ "Staging Node Manager           -- 54.69.197.241:2733"
-        p $ "LocalHost Node Manager         -- 54.69.197.241:2833"
-        p $ "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
+        p "Node Manager Documentation"
+        p "Site Navigation: "
+        p "/configure/get            -- Show all the Config Files              -- Eg:  post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2)]]))"
+        p "/configure/edit           -- Edit the Config File                   -- Eg: post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2000), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2000)]]))"
+        p "/configure/delete                                                   -- Delete the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/edit' (toJSON $ object ['configName' .= 'alarm-state-config', 'rewrite-rules' .= (object [('key' .= 'port') , ('val' .= 2)])])"
+        p "/configure/copy                                                     -- Copy the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/delete' (toJSON 'alarm-state-config')"
+        p "Production Node Manager        -- 108.168.240.123:2533"
+        p "Staging Node Manager           -- 54.69.197.241:2733"
+        p "LocalHost Node Manager         -- 54.69.197.241:2833"
+        p "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
 
 
 -- | return documents for node-manager
--- | / DocumentationAtHomeR GET 
+-- | / DocumentationAtHomeR GET
 getDocumentationAtHomeR :: Handler Html
-getDocumentationAtHomeR = do
-  return documentation
-  -- return . toJSON $ nodes'
+getDocumentationAtHomeR = return documentation
 
--- | /nodes/fetch/all AllNodesR GET
-getAllNodesR :: Handler Value
-getAllNodesR = do
-  (NodeManager{nodes=nodeState}) <- getYesod
-  nodesToReturn <- liftIO $ fetchStoredNodes nodeState
-  return . toJSON $ nodesToReturn
--- | insert a new nodeprocess to monitor
--- | /nodes/add AddNewR POST
-
-postAddNewR :: Handler Value
-postAddNewR = do
-  (NodeManager{nodes=nodeState}) <- getYesod
-  rcnp <- parseJsonBody :: Handler (Result ClientNodeProc)
-  case rcnp of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success cnp -> do
-      nodes' <- liftIO $ insertStoredNode nodeState cnp
-      void $ liftIO $ createCheckpoint nodeState
-      return . toJSON $ nodes'
-
--- API for Node Management
--- | get Status of a single node
-getNodeR :: Handler Value
-getNodeR = undefined
-
-
--- | Kill process running on a node
-killNodeR :: Handler Value
-killNodeR = undefined
-
-
--- | start a new node
-startNodeR  :: Handler Value
-startNodeR = undefined
-
--- | restart a node
-restartNodeR :: Handler Value
-restartNodeR = undefined
-
--- | register another manger
-
-registerNodeR :: Handler Value
-registerNodeR = undefined
-
-
--- | unregister another manager
-unregisterNodeR :: Handler Value
-unregisterNodeR = undefined
-
--- Node Management API End
 --------------------------------------------------
 --------------------------------------------------
--- | Configuration API       
+
+-- | Configuration API
 
 
 -- | make a list of rewrite rules
--- fromJSON   
+-- fromJSON
 makeKeyArr :: Value -> [Vedit]
 makeKeyArr = view ( key "rewrite-rules" ._JSON )
 
 -- | Take a Value and run through it one level, replacing anyting found with the incoming rewrite
 -- rule
-   
+
 rewriteRules :: Value -> [Vedit] -> Value
 rewriteRules  = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
 
@@ -151,63 +101,65 @@ removeExisting file = removeFile file `catch` handleExists
           | isDoesNotExistError e = return ()
           | otherwise = throwIO e
 
+getConfigureR :: Handler Value
+getConfigureR = do
+  directoryExist <- liftIO $ isDirectory "./configs"
+  case directoryExist of
+            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
+            True -> do
+              allConfigPaths <- liftIO $ listDirectory "./configs"
+              fileList <- liftIO $ traverse readFile allConfigPaths
+              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
+              return . toJSON $ jsonList
 
--- | /configure/edit EditConfigureR POST
--- This is how you use the edit route for rewrite rules
--- curl -d "{\"configName\":\"alarmDBConfig\" , \"rewrite-rules\":[{\"key\":\"url\" , \"val\":\"555\"}]}" localhost:2733/configure/edit   
-postEditConfigureR :: Handler Value
-postEditConfigureR = do
-  rParsed <- parseJsonBody :: Handler (Result Value)
-  case rParsed of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed -> do
-      case views (key "configName" . _String) T.unpack parsed of
+
+-------------------------------- Servant ---------------------------------
+
+
+type API = "configure" :> "edit" :> ReqBody Value :> Post Value
+      :<|> "configure" :> "add" :> ReqBody Value :>  Post Value
+      :<|> "configure" :> "delete" :> ReqBody Value :>  Post Value
+      :<|> "configure" :> "copy" :> ReqBody Value :>  Post Value
+      :<|> "configure" :> "clone" :> ReqBody Value :>  Post Value
+
+server :: Server API
+server = editConfig
+    :<|> addConfig
+    :<|> deleteConfig
+    :<|> copyConfig
+    :<|> cloneDir
+  where
+    editConfig :: Value -> EitherT ServantErr IO Value
+    editConfig configuration  = do
+      let mTitle = views (key "configName" . _String) T.unpack configuration
+      case mTitle of
         "" -> sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         title -> do
           file <- liftIO $ BS.readFile $ "./configs/" ++ title ++ ".yml"
           case (Y.decode file :: Maybe Value) of
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
-              let editKeys = makeKeyArr parsed
+              let editKeys = makeKeyArr configuration
               return $ rewriteRules json editKeys
-
-
--- | /configure/add AddConfigureR POST
-postAddConfigureR :: Handler Value
-postAddConfigureR = do
-  parsed <- parseJsonBody :: Handler (Result Value)
-  case parsed of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed' -> do
-      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
+    addConfig :: Value -> EitherT ServantErr IO Value
+    addConfig config = do
+      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
       case mTitle of
         Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
         Just title -> do
-          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
-          return parsed'
-
--- | /configure/delete DeleteConfigureR POST
-postDeleteConfigureR :: Handler Value
-postDeleteConfigureR = do
-  parsed <- parseJsonBody :: Handler (Result Value)
-  case parsed of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed' -> do
-      let pTitle = views _String T.unpack parsed'
+          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ config
+          return config
+    deleteConfig :: Value -> EitherT ServantErr IO Value
+    deleteConfig config = do
+      let pTitle = views _String T.unpack config
       case pTitle of
         "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
         title' -> do
            liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title' ++ ".yml")
            return . toJSON $ ("Success! " ++ title' ++ " was removed..")
-
--- | /configure/copy CopyConfigureR POST
-postCopyConfigureR :: Handler Value
-postCopyConfigureR = do
-  parsed <- parseJsonBody :: Handler (Result Value)
-  case parsed of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed' -> do
-      let pTarget = views (key "route" . _String) T.unpack parsed'
+    copyConfig :: Value -> EitherT ServantErr IO Value
+    copyConfig config = do
+      let pTarget = views (key "route" . _String) T.unpack config
       case pTarget of
         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
         target -> do
@@ -220,15 +172,9 @@ postCopyConfigureR = do
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               void $ liftIO $ traverse (post target) jsonList
               return . toJSON $ ("Copy Success" :: String)
-
--- | /configure/clone/diretory CloneDiretoryR POST
-postCloneDiretoryR :: Handler Value
-postCloneDiretoryR = do
-   parsed <- parseJsonBody :: Handler (Result Value)
-   case parsed of
-    Error e -> sendResponseStatus status501 (toJSON e)
-    Success parsed' -> do
-      let pTarget = views (key "directoryName" . _String) T.unpack parsed'
+    cloneDir :: Value -> EitherT ServantErr IO Value
+    cloneDir = do
+      let pTarget = views (key "directoryName" . _String) T.unpack config
       case pTarget of
         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy an empty diretory" :: T.Text))
         target -> do
@@ -242,41 +188,3 @@ postCloneDiretoryR = do
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               void $ liftIO $ traverse writeConfigFile jsonList
               return . toJSON $ ("Copy Success" :: String)
-
-getConfigureR :: Handler Value
-getConfigureR = do
-  directoryExist <- liftIO $ isDirectory "./configs"
-  case directoryExist of
-            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
-            True -> do
-              allConfigPaths <- liftIO $ listDirectory "./configs"
-              fileList <- liftIO $ traverse readFile allConfigPaths
-              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
-              return . toJSON $ jsonList
-
-
--- buildFilePaths :: [String] -> IO [FilePath]
--- buildFilePaths titles = do
---       let paths =  fromText . T.pack <$> titles
---       return paths
-
--- postCloneConfigureR :: Handler Value
--- postCloneConfigureR = do
---   parsed <- parseJsonBody :: Handler (Result Value)
---   case parsed of
---     Error e -> sendResponseStatus status501 (toJSON e)
---     Success parsed -> do
---       let pTarget = views (key "route" . _String) T.unpack parsed
---       case pTarget of
---         "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
---         target -> do
---           directoryExist <- liftIO $ isDirectory "./configs"
---           case directoryExist of
---             False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
---             True -> do
---               let cloneList = views (key (T.unpack "nameList") . values)  parsed
---               allConfigPaths <- liftIO $ listDirectory "./configs"
---               fileList <- liftIO $ traverse readFile allConfigPaths
---               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
---               liftIO $ traverse (post target) jsonList
---               return . toJSON $ ("" :: String)

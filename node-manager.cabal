@@ -47,6 +47,10 @@ Library
                        ,streaming-commons
                        ,unix
                        ,blaze-html
+                       ,servant
+                       ,servant-docs
+                       ,servant-jquery
+                       ,servant-server
                         
 
 
@@ -80,6 +84,10 @@ executable node-manager
                      ,streaming-commons
                      ,unix
                      ,blaze-html
+                     ,servant
+                     ,servant-docs
+                     ,servant-jquery
+                     ,servant-server
 
   ghc-options:       -threaded -O2 -rtsopts -Wall 
 
