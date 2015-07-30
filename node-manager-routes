@@ -1,11 +1,6 @@
 -- Root
 / DocumentationAtHomeR GET
 
--- Node Process
--- /nodes/add AddNewR POST
--- /nodes/fetch/all AllNodesR GET
-
-
 -- Config Files
 /configure/get ConfigureR GET
 /configure/edit EditConfigureR POST

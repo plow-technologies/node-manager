@@ -1,49 +1,39 @@
-{-# LANGUAGE DataKinds          #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
-{-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE QuasiQuotes        #-}
-{-# LANGUAGE TemplateHaskell    #-}
-{-# LANGUAGE TypeFamilies       #-}
-{-# LANGUAGE TypeOperators      #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE TypeOperators     #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
 module Node.Manager.Routes where
 
-import           Control.Exception              (catch, throwIO)
-import           Control.Lens                   (set, traverse, view, views)
-import           Control.Monad                  (void)
+import           Control.Exception          (catch, throwIO)
+import           Control.Lens               (set, traverse, view, views)
+import           Control.Monad              (void)
 import           Control.Monad.Trans.Either
-import           Data.Aeson                     (Result (..), ToJSON, Value,
-                                                 toJSON)
-import           Data.Aeson.Lens                (AsValue, key, members, _JSON,
-                                                 _Object, _String)
-import qualified Data.ByteString                as BS (readFile)
-import qualified Data.ByteString.Lazy           as LBS (fromStrict, writeFile)
-import qualified Data.HashMap.Strict            as HM (toList)
-import           Data.List                      (foldl')
-import           Data.Maybe                     (catMaybes, listToMaybe)
-import qualified Data.Text                      as T
-import qualified Data.Yaml                      as Y
-import           Filesystem                     as FS
-import qualified Filesystem.Path.CurrentOS      as FPQ
-import           Network.HTTP.Types.Status
-import           Network.Wreq
-import           Node.Manager.DIG
-import           Node.Manager.Routes.Foundation
+import           Data.Aeson                 (ToJSON, Value, toJSON)
+import           Data.Aeson.Lens            (AsValue, key, members, _JSON,
+                                             _Object, _String)
+import qualified Data.ByteString            as BS (readFile)
+import qualified Data.ByteString.Lazy       as LBS (fromStrict, writeFile)
+import qualified Data.HashMap.Strict        as HM (toList)
+import           Data.List                  (foldl')
+import           Data.Maybe                 (catMaybes, listToMaybe)
+import qualified Data.Text                  as T
+import qualified Data.Yaml                  as Y
+import           Filesystem                 as FS
+import qualified Filesystem.Path.CurrentOS  as FPQ
+import           Network.Wai                (Application)
+import           Network.Wreq               hiding (Proxy)
 import           Node.Manager.Types
-import           Prelude                        hiding (FilePath, div, head,
-                                                 readFile)
+import           Prelude                    hiding (FilePath, div, head,
+                                             readFile)
 import           Servant
-import           Servant.API
-import           SimpleStore                    (createCheckpoint)
-import           System.IO.Error                (isDoesNotExistError)
-import           Text.Blaze.Html5               (Html, body, head, p, title)
-import           Yesod.Core                     (Yesod, getYesod, liftIO,
-                                                 mkYesodDispatch, parseJsonBody,
-                                                 sendResponseStatus)
+import           Servant.HTML.Blaze
+import           System.IO.Error            (isDoesNotExistError)
+import           Text.Blaze.Html5           (Html, body, head, p, title)
+import           Yesod.Core                 (liftIO)
 
 documentation :: Html
 documentation = do
@@ -59,12 +49,6 @@ documentation = do
         p "Staging Node Manager           -- 54.69.197.241:2733"
         p "LocalHost Node Manager         -- 54.69.197.241:2833"
         p "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
-
-
--- | return documents for node-manager
--- | / DocumentationAtHomeR GET
-getDocumentationAtHomeR :: Handler Html
-getDocumentationAtHomeR = return documentation
 
 --------------------------------------------------
 --------------------------------------------------
@@ -88,24 +72,13 @@ writeConfigFile parsed' = do
   let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) parsed'
   case mTitle of
         Nothing -> putStrLn "Could not find field config name"
-        Just title -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
+        Just t -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack t  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
 
 removeExisting :: FPQ.FilePath -> IO()
 removeExisting file = removeFile file `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
           | otherwise = throwIO e
-
-getConfigureR :: Handler Value
-getConfigureR = do
-  directoryExist <- liftIO $ isDirectory "./configs"
-  case directoryExist of
-            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
-            True -> do
-              allConfigPaths <- liftIO $ listDirectory "./configs"
-              fileList <- liftIO $ traverse readFile allConfigPaths
-              let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
-              return . toJSON $ jsonList
 
 
 -------------------------------- Servant ---------------------------------
@@ -116,6 +89,8 @@ type API = "configure" :> "edit" :> ReqBody '[JSON] Value :> Post '[JSON] Value
       :<|> "configure" :> "delete" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
       :<|> "configure" :> "copy" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
       :<|> "configure" :> "clone" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
+      :<|> "configure" :> "get" :> Get '[JSON] Value
+      :<|> Get '[HTML] Html
 
 server :: Server API
 server = editConfig
@@ -123,14 +98,16 @@ server = editConfig
     :<|> deleteConfig
     :<|> copyConfig
     :<|> cloneDir
+    :<|> getConfigure
+    :<|> return documentation
   where
     editConfig :: Value -> EitherT ServantErr IO Value
     editConfig configuration  = do
       let mTitle = views (key "configName" . _String) T.unpack configuration
       case mTitle of
         "" -> return $ toJSON ( "Could not find field config name" :: T.Text)
-        title -> do
-          file <- liftIO $ BS.readFile $ "./configs/" ++ title ++ ".yml"
+        t -> do
+          file <- liftIO $ BS.readFile $ "./configs/" ++ t ++ ".yml"
           case (Y.decode file :: Maybe Value) of
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
@@ -141,8 +118,8 @@ server = editConfig
       let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
       case mTitle of
         Nothing ->  return $ toJSON ( "Could not find field config name" :: T.Text)
-        Just title -> do
-          liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ config
+        Just t -> do
+          liftIO . LBS.writeFile ("./configs/" ++ T.unpack t  ++ ".yml") . LBS.fromStrict . Y.encode $ config
           return config
     deleteConfig :: Value -> EitherT ServantErr IO Value
     deleteConfig config = do
@@ -183,3 +160,20 @@ server = editConfig
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               void $ liftIO $ traverse writeConfigFile jsonList
               return $ toJSON ("Copy Success" :: String)
+    getConfigure :: EitherT ServantErr IO Value
+    getConfigure = do
+      directoryExist <- liftIO $ isDirectory "./configs"
+      case directoryExist of
+        False -> return $ toJSON ( "/configs directory does not exist" :: T.Text)
+        True -> do
+          allConfigPaths <- liftIO $ listDirectory "./configs"
+          fileList <- liftIO $ traverse readFile allConfigPaths
+          let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
+          return . toJSON $ jsonList
+
+
+userAPI :: Proxy API
+userAPI = Proxy
+
+app :: Application
+app = serve userAPI server

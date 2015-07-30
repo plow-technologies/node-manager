@@ -1,7 +1,7 @@
 Name:                   node-manager
 Version:                0.1.0
-Author:                 Hong <hongj77@gmail.com>
-Maintainer:             Hong <hongj77@gmail.com>
+Author:                 Hong <hongj77@gmail.com>, Darren Midkiff <darren.midkiff@plowtech.net>
+Maintainer:             Hong <hongj77@gmail.com>, Darren Midkiff <darren.midkiff@plowtech.net>
 License:                BSD3
 License-File:           LICENSE
 Synopsis:               Server that manages alarm nodes
@@ -19,7 +19,6 @@ Library
                         Node.Manager.Types.SimpleStore
                         Node.Manager.Routes
                         Node.Manager.Routes.Foundation
-                        Node.Manager.DIG
   
   Build-Depends:        aeson
                       , async
@@ -46,10 +45,12 @@ Library
                       , transformers          >= 0.4.1.0
                       , unix
                       , unordered-containers  >= 0.2.5.0
+                      , wai >= 3.0.3.0
                       , warp
                       , wreq                  >= 0.2.0.0 && < 0.3.0.0
                       , yaml
                       , yesod-core
+                      , servant-blaze
                         
 
 
@@ -82,10 +83,12 @@ executable node-manager
                     , transformers
                     , unix
                     , unordered-containers
+                    , wai >= 3.0.3.0
                     , warp
                     , wreq
                     , yaml
                     , yesod-core
+                    , servant-blaze
 
   ghc-options:       -threaded -O2 -rtsopts -Wall 
 
@@ -97,34 +100,36 @@ Test-Suite spec
                       , test
   Ghc-Options:          -Wall -fno-warn-orphans
   Main-Is:              Spec.hs
-  Build-Depends:        base
-                      , hspec
-                      , yesod-core
-                      , yesod-test
+  Build-Depends:        aeson
                       , async
-                      , simple-store
-                      , plow-extras-lens
-                      , node-client-configs
-                      , bytestring 
-                      , mtl
+                      , base
+                      , blaze-html
+                      , bytestring
+                      , cereal
                       , containers
-                      , unordered-containers
-                      , text
-                      , aeson
+                      , hspec
+                      , http-types
                       , lens
+                      , lens-aeson
+                      , mtl
+                      , node-client-configs
+                      , plow-extras-lens
+                      , simple-store
+                      , streaming-commons
+                      , system-fileio
+                      , system-filepath
+                      , template-haskell
+                      , text
+                      , transformers
+                      , unix
+                      , unordered-containers
+                      , wai >= 3.0.3.0
                       , warp
                       , wreq
                       , yaml
-                      , http-types 
-                      , transformers
-                      , system-fileio
-                      , system-filepath
-                      , lens-aeson
-                      , cereal
-                      , template-haskell
-                      , streaming-commons
-                      , unix 
-                      , blaze-html
+                      , yesod-core
+                      , yesod-test
+                      , servant-blaze
                       
 Source-Repository head
   Type:                 git
