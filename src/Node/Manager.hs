@@ -6,25 +6,22 @@ module Node.Manager (  initializeDirectory
                     ) where
 
 
-import           Control.Exception              (finally)
-import           Control.Monad                  (unless, void)
-import           Data.Text                      (Text)
-import           Filesystem                     hiding (readFile, writeFile)
-import           Filesystem.Path                (absolute, (</>))
-import qualified Filesystem.Path.CurrentOS      as OS (FilePath, fromText)
-import           Network.Wai.Handler.Warp       (defaultSettings, runSettings,
-                                                 setHost, setPort, setTimeout)
-import           Node.Client.Configs            (NodeManagerConfig (..),
-                                                 getHostPreference,
-                                                 readNodeManagerConf)
-import           Node.Manager.Routes            ()
-import           Node.Manager.Routes.Foundation (NodeManager (..))
-import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
-import           SimpleStore                    (closeSimpleStore,
-                                                 createCheckpoint)
-import           System.IO                      (hPrint, stderr)
+import           Control.Exception         (finally)
+import           Control.Monad             (unless, void)
+import           Data.Text                 (Text)
+import           Filesystem                hiding (readFile, writeFile)
+import           Filesystem.Path           (absolute, (</>))
+import qualified Filesystem.Path.CurrentOS as OS (FilePath, fromText)
+import           Network.Wai.Handler.Warp  (defaultSettings, runSettings,
+                                            setHost, setPort, setTimeout)
+import           Node.Client.Configs       (NodeManagerConfig (..),
+                                            getHostPreference,
+                                            readNodeManagerConf)
+import           Node.Manager.Routes       ()
+import           SimpleStore               (closeSimpleStore, createCheckpoint)
+import           System.IO                 (hPrint, stderr)
 
-import           Yesod.Core.Dispatch            (toWaiApp)
+import           Yesod.Core.Dispatch       (toWaiApp)
 
 -- Default Node Manager Config Path
 defaultNodeManagerConfPath :: OS.FilePath

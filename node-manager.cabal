@@ -14,11 +14,7 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      Node.Manager
-                        Node.Manager.Client
-  Other-Modules:        Node.Manager.Types
-                        Node.Manager.Types.SimpleStore
-                        Node.Manager.Routes
-                        Node.Manager.Routes.Foundation
+  Other-Modules:        Node.Manager.Routes
   
   Build-Depends:        aeson
                       , async
