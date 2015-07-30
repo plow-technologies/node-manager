@@ -1,10 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Node.Manager (  buildNodeManager
-                     , startNodeManager
-                     , startServer
-                     , initializeDirectory
+module Node.Manager (  initializeDirectory
                      , defaultConfigStoredPath
                     ) where
 
@@ -42,15 +39,6 @@ defaultConfigStoredPath = OS.fromText ("./configs"::Text)
 ePrint :: Show a => a -> IO ()
 ePrint = hPrint stderr
 
--- Build Node Manger Yesod Fundation
-buildNodeManager :: NodeManagerConfig ->  IO NodeManager
-buildNodeManager nc  =  do
-  putStrLn "NodeManager Initializing ..."
-  putStrLn  "Initializing store"
-  nmcs <- initializeSimpleStore . OS.fromText .  managerFilePath $ nc
-  putStrLn "Initializing store done"
-  return NodeManager {nodes=nmcs}
-
 -- Make Absolute File Path
 makeAbsoluteFp :: OS.FilePath -> IO OS.FilePath
 makeAbsoluteFp fp =
@@ -69,33 +57,3 @@ initializeDirectory dir = do
   unless exists $ do
         createDirectory True fp
         putStrLn "Sucessfully Created Configs stored Diretory."
-
--- Start Node Manager Server
-startNodeManager :: IO ()
-startNodeManager = do
-  nc <- readNodeManagerConf defaultNodeManagerConfPath
-  ePrint ("Node Manager Configuraton :"::Text) >> ePrint nc
-  nmFoundation <- buildNodeManager nc
-  initializeDirectory defaultConfigStoredPath
-  finally (
-         putStrLn "Starting ..." >> startServer nc nmFoundation
-           ) (void $ do
-                 let msg :: Text
-                     msg = "Closing Node Manager Server"
-                 ePrint msg
-                 void $  createCheckpoint (nodes nmFoundation)
-                 closeSimpleStore (nodes nmFoundation))
-
--- Start Warp Server
-startServer :: NodeManagerConfig -> NodeManager -> IO ()
-startServer nc nmFoundation =  do
-  app <- toWaiApp nmFoundation
-  let nodeManagerDefaults = setTimeout (3*60).
-                            (setHost.getHostPreference.nodeManagerHost $ nc).
-                              (setPort.nodeManagerPort $ nc) $ defaultSettings
-  runSettings nodeManagerDefaults app
-
-
-
-
-

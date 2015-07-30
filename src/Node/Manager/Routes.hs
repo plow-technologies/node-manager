@@ -1,8 +1,12 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE NoImplicitPrelude  #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE QuasiQuotes        #-}
+{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE TypeFamilies       #-}
+{-# LANGUAGE TypeOperators      #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
@@ -11,6 +15,7 @@ module Node.Manager.Routes where
 import           Control.Exception              (catch, throwIO)
 import           Control.Lens                   (set, traverse, view, views)
 import           Control.Monad                  (void)
+import           Control.Monad.Trans.Either
 import           Data.Aeson                     (Result (..), ToJSON, Value,
                                                  toJSON)
 import           Data.Aeson.Lens                (AsValue, key, members, _JSON,
@@ -23,7 +28,7 @@ import           Data.Maybe                     (catMaybes, listToMaybe)
 import qualified Data.Text                      as T
 import qualified Data.Yaml                      as Y
 import           Filesystem                     as FS
-import           Filesystem.Path.CurrentOS
+import qualified Filesystem.Path.CurrentOS      as FPQ
 import           Network.HTTP.Types.Status
 import           Network.Wreq
 import           Node.Manager.DIG
@@ -31,28 +36,18 @@ import           Node.Manager.Routes.Foundation
 import           Node.Manager.Types
 import           Prelude                        hiding (FilePath, div, head,
                                                  readFile)
+import           Servant
+import           Servant.API
 import           SimpleStore                    (createCheckpoint)
 import           System.IO.Error                (isDoesNotExistError)
+import           Text.Blaze.Html5               (Html, body, head, p, title)
 import           Yesod.Core                     (Yesod, getYesod, liftIO,
                                                  mkYesodDispatch, parseJsonBody,
                                                  sendResponseStatus)
 
-import           Text.Blaze.Html5               (Html, body, head, p, title)
-import           Servant
--- import qualified Text.Blaze.Html5.Attributes    as A
-
-mkYesodDispatch "NodeManager" resourcesNodeManager
-
-instance Yesod NodeManager
-
--- Remember this is where your route modifiers go... Like magic
---  maximumContentLength _ (Just (AlarmDataR )) = Just $ 2 * 1024 * 1024 * 1024
---  maximumContentLength _ _ = Just $ 2 * 1024 * 1024
-
 documentation :: Html
 documentation = do
-    head $ do
-        title "Node Manager"
+    head $ title "Node Manager"
     body $ do
         p "Node Manager Documentation"
         p "Site Navigation: "
@@ -95,7 +90,7 @@ writeConfigFile parsed' = do
         Nothing -> putStrLn "Could not find field config name"
         Just title -> liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ parsed'
 
-removeExisting :: FilePath -> IO()
+removeExisting :: FPQ.FilePath -> IO()
 removeExisting file = removeFile file `catch` handleExists
   where handleExists e
           | isDoesNotExistError e = return ()
@@ -116,11 +111,11 @@ getConfigureR = do
 -------------------------------- Servant ---------------------------------
 
 
-type API = "configure" :> "edit" :> ReqBody Value :> Post Value
-      :<|> "configure" :> "add" :> ReqBody Value :>  Post Value
-      :<|> "configure" :> "delete" :> ReqBody Value :>  Post Value
-      :<|> "configure" :> "copy" :> ReqBody Value :>  Post Value
-      :<|> "configure" :> "clone" :> ReqBody Value :>  Post Value
+type API = "configure" :> "edit" :> ReqBody '[JSON] Value :> Post '[JSON] Value
+      :<|> "configure" :> "add" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
+      :<|> "configure" :> "delete" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
+      :<|> "configure" :> "copy" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
+      :<|> "configure" :> "clone" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
 
 server :: Server API
 server = editConfig
@@ -133,7 +128,7 @@ server = editConfig
     editConfig configuration  = do
       let mTitle = views (key "configName" . _String) T.unpack configuration
       case mTitle of
-        "" -> sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
+        "" -> return $ toJSON ( "Could not find field config name" :: T.Text)
         title -> do
           file <- liftIO $ BS.readFile $ "./configs/" ++ title ++ ".yml"
           case (Y.decode file :: Maybe Value) of
@@ -145,7 +140,7 @@ server = editConfig
     addConfig config = do
       let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
       case mTitle of
-        Nothing ->  sendResponseStatus status501 (toJSON ( "Could not find field config name" :: T.Text))
+        Nothing ->  return $ toJSON ( "Could not find field config name" :: T.Text)
         Just title -> do
           liftIO . LBS.writeFile ("./configs/" ++ T.unpack title  ++ ".yml") . LBS.fromStrict . Y.encode $ config
           return config
@@ -153,19 +148,19 @@ server = editConfig
     deleteConfig config = do
       let pTitle = views _String T.unpack config
       case pTitle of
-        "" ->  sendResponseStatus status501 (toJSON ( "Cannot match blank title" :: T.Text))
+        "" ->  return $ toJSON ( "Cannot match blank title" :: T.Text)
         title' -> do
-           liftIO . removeExisting . fromText . T.pack $ ("./configs/" ++ title' ++ ".yml")
+           liftIO . removeExisting . FPQ.fromText . T.pack $ ("./configs/" ++ title' ++ ".yml")
            return . toJSON $ ("Success! " ++ title' ++ " was removed..")
     copyConfig :: Value -> EitherT ServantErr IO Value
     copyConfig config = do
       let pTarget = views (key "route" . _String) T.unpack config
       case pTarget of
-        "" -> sendResponseStatus status501 (toJSON ( "Cannot copy to an empty URL" :: T.Text))
+        "" -> return $ toJSON ( "Cannot copy to an empty URL" :: T.Text)
         target -> do
           directoryExist <- liftIO $ isDirectory "./configs"
           case directoryExist of
-            False -> sendResponseStatus status501 (toJSON ( "/configs directory does not exist" :: T.Text))
+            False -> return $ toJSON ("/configs directory does not exist" :: T.Text)
             True -> do
               allConfigPaths <- liftIO $ listDirectory "./configs"
               fileList <- liftIO $ traverse readFile allConfigPaths
@@ -173,18 +168,18 @@ server = editConfig
               void $ liftIO $ traverse (post target) jsonList
               return . toJSON $ ("Copy Success" :: String)
     cloneDir :: Value -> EitherT ServantErr IO Value
-    cloneDir = do
+    cloneDir config = do
       let pTarget = views (key "directoryName" . _String) T.unpack config
       case pTarget of
-        "" -> sendResponseStatus status501 (toJSON ( "Cannot copy an empty diretory" :: T.Text))
+        "" -> return $ toJSON ( "Cannot copy an empty diretory" :: T.Text)
         target -> do
-          let targetDir = fromText . T.pack $ target
-          directoryExist <- liftIO $ isDirectory . fromText . T.pack $ target
+          let targetDir = FPQ.fromText . T.pack $ target
+          directoryExist <- liftIO $ isDirectory . FPQ.fromText . T.pack $ target
           case directoryExist of
-            False -> sendResponseStatus status501 (toJSON ( T.pack (target ++  "  does not exist")))
+            False -> return $ toJSON ( T.pack (target ++  "  does not exist"))
             True -> do
               allConfigPaths <- liftIO $ listDirectory targetDir
               fileList <- liftIO $ traverse readFile allConfigPaths
               let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
               void $ liftIO $ traverse writeConfigFile jsonList
-              return . toJSON $ ("Copy Success" :: String)
+              return $ toJSON ("Copy Success" :: String)
