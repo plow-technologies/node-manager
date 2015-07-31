@@ -9,7 +9,7 @@ import           TestImport
 -- Specs
 import           ConfigSpec              (configSpec)
 import           Control.Concurrent      (forkIO, killThread)
-import           FileSpec                (fileSpec)
+--import           FileSpec                (fileSpec)
 import           Node.Manager            (defaultConfigStoredPath,
                                           initializeDirectory)
 import           Node.Manager.RoutesSpec (routesSpec)
@@ -22,7 +22,7 @@ main =  do
    hspec $
         yesodSpec foundation $ do
             configSpec
-            fileSpec
+            --fileSpec
             routesSpec
    killThread tId
 

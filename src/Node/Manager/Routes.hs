@@ -26,29 +26,14 @@ import           Filesystem                 as FS
 import qualified Filesystem.Path.CurrentOS  as FPQ
 import           Network.Wai                (Application)
 import           Network.Wreq               hiding (Proxy)
+import           Node.Manager.Client
 import           Node.Manager.Types
 import           Prelude                    hiding (FilePath, div, head,
                                              readFile)
 import           Servant
-import           Servant.HTML.Blaze
+import           System.IO                  (FilePath)
 import           System.IO.Error            (isDoesNotExistError)
-import           Text.Blaze.Html5           (Html, body, head, p, title)
 import           Yesod.Core                 (liftIO)
-
-documentation :: Html
-documentation = do
-    head $ title "Node Manager"
-    body $ do
-        p "Node Manager Documentation"
-        p "Site Navigation: "
-        p "/configure/get            -- Show all the Config Files              -- Eg:  post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2)]]))"
-        p "/configure/edit           -- Edit the Config File                   -- Eg: post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2000), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2000)]]))"
-        p "/configure/delete                                                   -- Delete the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/edit' (toJSON $ object ['configName' .= 'alarm-state-config', 'rewrite-rules' .= (object [('key' .= 'port') , ('val' .= 2)])])"
-        p "/configure/copy                                                     -- Copy the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/delete' (toJSON 'alarm-state-config')"
-        p "Production Node Manager        -- 108.168.240.123:2533"
-        p "Staging Node Manager           -- 54.69.197.241:2733"
-        p "LocalHost Node Manager         -- 54.69.197.241:2833"
-        p "Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs."
 
 --------------------------------------------------
 --------------------------------------------------
@@ -84,14 +69,6 @@ removeExisting file = removeFile file `catch` handleExists
 -------------------------------- Servant ---------------------------------
 
 
-type API = "configure" :> "edit" :> ReqBody '[JSON] Value :> Post '[JSON] Value
-      :<|> "configure" :> "add" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
-      :<|> "configure" :> "delete" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
-      :<|> "configure" :> "copy" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
-      :<|> "configure" :> "clone" :> ReqBody '[JSON] Value :>  Post '[JSON] Value
-      :<|> "configure" :> "get" :> Get '[JSON] Value
-      :<|> Get '[HTML] Html
-
 server :: Server API
 server = editConfig
     :<|> addConfig
@@ -99,7 +76,7 @@ server = editConfig
     :<|> copyConfig
     :<|> cloneDir
     :<|> getConfigure
-    :<|> return documentation
+    :<|> docs
   where
     editConfig :: Value -> EitherT ServantErr IO Value
     editConfig configuration  = do
@@ -170,10 +147,7 @@ server = editConfig
           fileList <- liftIO $ traverse readFile allConfigPaths
           let jsonList = catMaybes (map Y.decode fileList :: [Maybe Value])
           return . toJSON $ jsonList
-
-
-userAPI :: Proxy API
-userAPI = Proxy
+    docs = serveDirectory ("src/Node/Manager/Static" :: FilePath)
 
 app :: Application
 app = serve userAPI server

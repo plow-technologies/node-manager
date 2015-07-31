@@ -3,7 +3,6 @@
 module TestImport
     (  module Yesod.Test
      , module Yesod.Core
-     , module Node.Manager.Routes.Foundation
      , module Node.Manager.Routes
      , module Data.Aeson
      , module Class
@@ -20,26 +19,19 @@ module TestImport
      , testRewriteResult
      , testEncodedRewriteRule
      , testRewriteRule
-     , mkTestFoundation
      ) where
 
 
-import           Control.Monad.IO.Class         as Class
-import           Data.Aeson                     (Value, decode, encode, object,
-                                                 (.=))
-import           Data.Maybe                     (fromJust)
-import qualified Data.Yaml                      as Y (decodeFile)
-import           Node.Manager.Client.Types      (Vedit (..))
+import           Control.Monad.IO.Class    as Class
+import           Data.Aeson                (Value, decode, encode, object, (.=))
+import           Data.Maybe                (fromJust)
+import qualified Data.Yaml                 as Y (decodeFile)
+import           Node.Manager.Client.Types (Vedit (..))
 import           Node.Manager.Routes
-import           Node.Manager.Routes.Foundation
-import           Node.Manager.Types.SimpleStore (initializeSimpleStore)
-import           Yesod.Core                     (getYesod, warp)
+import           Test.Hspec
+import           Yesod.Core                (getYesod, warp)
 import           Yesod.Test
 
-mkTestFoundation :: IO NodeManager
-mkTestFoundation = do
-  nmcs <- initializeSimpleStore "NodeManagerStates"
-  return NodeManager {nodes = nmcs}
 
 readTestConf :: FilePath -> IO Value
 readTestConf fPath = do
@@ -89,7 +81,3 @@ testDeleteRequest = "alarm-state-config"
 
 testCloneDirRequest :: Value
 testCloneDirRequest = object ["directoryName" .= ("testConfigsDir"::String)]
-
-type Spec = YesodSpec NodeManager
-type Example = YesodExample NodeManager
-

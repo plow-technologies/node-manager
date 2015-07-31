@@ -47,6 +47,7 @@ Library
                       , yaml
                       , yesod-core
                       , servant-blaze
+                      , servant-client
                         
 
 
@@ -85,6 +86,7 @@ executable node-manager
                     , yaml
                     , yesod-core
                     , servant-blaze
+                    , servant-client
 
   ghc-options:       -threaded -O2 -rtsopts -Wall 
 
@@ -103,6 +105,7 @@ Test-Suite spec
                       , bytestring
                       , cereal
                       , containers
+                      , either >= 4.4.1
                       , hspec
                       , http-types
                       , lens
@@ -110,6 +113,11 @@ Test-Suite spec
                       , mtl
                       , node-client-configs
                       , plow-extras-lens
+                      , servant
+                      , servant-blaze
+                      , servant-server
+                      , servant-client
+                      , QuickCheck
                       , simple-store
                       , streaming-commons
                       , system-fileio
@@ -125,7 +133,6 @@ Test-Suite spec
                       , yaml
                       , yesod-core
                       , yesod-test
-                      , servant-blaze
                       
 Source-Repository head
   Type:                 git

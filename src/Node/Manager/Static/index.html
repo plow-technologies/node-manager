@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<title>Node Manager</title>
+<h3>Node Manager Documentation</h3>
+<pre>
+  <p>
+    Site Navigation: <br>
+    /configure/get            -- Show all the Config Files              -- Eg:  post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2)]])) <br>
+    /configure/edit           -- Edit the Config File                   -- Eg: post 'http://some.lame.nodemanager.com/configure/add' (toJSON (object ['alarm-state-config' .= object  [ ( 'tag' .= 2000), ('src' .= (object ['almKeySrc' .= (object [ 'unSText' .=  'onping.plowtech.net'])])),  ('host' .= 'www.stupidurl.com'), ('port'.= 2000)]])) <br>
+    /configure/delete                                                   -- Delete the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/edit' (toJSON $ object ['configName' .= 'alarm-state-config', 'rewrite-rules' .= (object [('key' .= 'port') , ('val' .= 2)])]) <br>
+    /configure/copy                                                     -- Copy the Config File -- Eg: post 'http://some.lame.nodemanager.com/configure/delete' (toJSON 'alarm-state-config') <br>
+    Production Node Manager        -- 108.168.240.123:2533 <br>
+    Staging Node Manager           -- 54.69.197.241:2733 <br>
+    LocalHost Node Manager         -- 54.69.197.241:2833 <br>
+    Note: If you want to change a configure file, do not do it on your local path. User rewrite route '/configure/edit' or change it on the server under the path /configs. <br>
+  </p>
+</pre>
