@@ -1,14 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module TestImport
-    (  module Yesod.Test
-     , module Yesod.Core
-     , module Node.Manager.Routes
-     , module Data.Aeson
-     , module Class
-     , Spec
-     , Example
-     , readTestConf
+module TestData
+    (  readTestConf
      , testRetriveRequest
      , testRetriveRequestWRewrite
      , testCopyRequest
@@ -22,14 +15,15 @@ module TestImport
      ) where
 
 
-import           Control.Monad.IO.Class    as Class
-import           Data.Aeson                (Value, decode, encode, object, (.=))
-import           Data.Maybe                (fromJust)
-import qualified Data.Yaml                 as Y (decodeFile)
-import           Node.Manager.Client.Types (Vedit (..))
+import           Control.Monad.IO.Class as Class
+import           Data.Aeson             (Value, decode, encode, object, toJSON,
+                                         (.=))
+import           Data.Maybe             (fromJust)
+import qualified Data.Yaml              as Y (decodeFile)
 import           Node.Manager.Routes
+import           Node.Manager.Types     (Vedit (..))
 import           Test.Hspec
-import           Yesod.Core                (getYesod, warp)
+import           Yesod.Core             (getYesod, warp)
 import           Yesod.Test
 
 
@@ -70,14 +64,14 @@ testEncodedRewriteRule :: Value
 testEncodedRewriteRule = fromJust $ decode "{\"rewrite-rules\":[{\"key\":\"testrule\",\"val\":\"hope floats\"}]}"
 
 
-cloneList :: [String]
-cloneList = ["alarm-state-config"]
+cloneList :: Value
+cloneList = toJSON (["alarm-state-config"] :: [String])
 
 testCloneRequest :: Value
 testCloneRequest = object ["route".=("http://127.0.0.1:3001/configure/add"::String), "nameList" .= cloneList]
 
-testDeleteRequest :: String
-testDeleteRequest = "alarm-state-config"
+testDeleteRequest :: Value
+testDeleteRequest = toJSON ("alarm-state-config" :: String)
 
 testCloneDirRequest :: Value
 testCloneDirRequest = object ["directoryName" .= ("testConfigsDir"::String)]

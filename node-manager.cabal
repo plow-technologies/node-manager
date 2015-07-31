@@ -98,7 +98,8 @@ Test-Suite spec
                       , test
   Ghc-Options:          -Wall -fno-warn-orphans
   Main-Is:              Spec.hs
-  Build-Depends:        aeson
+  Build-Depends:        QuickCheck
+                      , aeson
                       , async
                       , base
                       , blaze-html
@@ -115,9 +116,8 @@ Test-Suite spec
                       , plow-extras-lens
                       , servant
                       , servant-blaze
-                      , servant-server
                       , servant-client
-                      , QuickCheck
+                      , servant-server
                       , simple-store
                       , streaming-commons
                       , system-fileio
@@ -133,6 +133,8 @@ Test-Suite spec
                       , yaml
                       , yesod-core
                       , yesod-test
+                      , lens
+                      , lens-aeson
                       
 Source-Repository head
   Type:                 git

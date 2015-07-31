@@ -2,12 +2,11 @@
 
 module Main where
 
-
-import           ConfigSpec         (configSpec)
-import           Control.Concurrent (forkIO, killThread)
-import           Node.Manager       (defaultConfigStoredPath,
-                                     initializeDirectory)
-import           Test.Hspec         (hspec)
+import           Test.Hspec (hspec)
+import           TestSpecs  (configSpec, fileSpec, routesSpec)
 
 main :: IO ()
-main =  undefined
+main =  hspec $ do
+  configSpec
+  fileSpec
+  routesSpec
