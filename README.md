@@ -18,11 +18,35 @@ Pushing to the production branch causes circleci to build the new binary for nod
 
 ## Using to configure Nodes
 
-### Adding a Configuration
+### Using the client
 
-To add a new configuration to serve to nodes...
+Servant client can be used for easy haskell interface. Future examples of using the client will assume you have done the following
 
 ```
+import Node.Client
+
+conf <- readNodeManagerConf <config file path>
+api <- makeNodeAPI conf
+
+```
+client functions are stored in API and can now be accessed in the following manner
+
+```
+addCfg api      -- Takes a value and adds it to Node Manager
+retrieveCfg api -- Takes a config name and returns the associated config
+editCfg api     -- Takes a value containing changes to a config and applies those changes
+deleteCfg api   -- Takes a value and deletes the associated config from Node Manager
+copyCfg api     -- Takes a value including a node manager address and copies the configs from that node manager
+
+```
+
+### Adding a Configuration
+
+To add a new configuration to serve to nodes, use the client or post...
+
+```
+$> (addCfg api) <Value Object just like post example>
+
 $> post "http://some.lame.nodemanager.com/configure/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  ("host" .= "www.stupidurl.com"), ("port".= 2)]]))
 
 Success ! Configuration: alarm-state-config ... Added
@@ -44,9 +68,11 @@ To be requested by a node in the future
 
 ### Editing a Configuration
 
-To replace existing default configuration files, post the new configuration settings to the same name
+To edit existing default configuration files, use the client or post the settings you wish to change to /configure/edit
 
 ```
+$> (editCfg api) <Value Object just like post example>
+
 $> post "http://some.lame.nodemanager.com/configure/edit" (toJSON (object ["configName" .= "alarm-state-config", "rewrite-rules" .= [object ["key" .= "port", "val" .= 4]]]))
 
 ```
@@ -65,9 +91,11 @@ alarm-state-config:
 
 ### Replacing a Configuration
 
-To replace existing default configuration files, post the new configuration settings to the same name
+To replace existing default configuration files, use the client or post the new configuration settings to the same name
 
 ```
+$> (addCfg api) <Value Object just like post example>
+
 $> post "http://some.lame.nodemanager.com/configure/add" (toJSON (object ["alarm-state-config" .= object  [ ( "tag" .= 2000), ("src" .= (object ["almKeySrc" .= (object [ "unSText" .=  "onping.plowtech.net"])])),  ("host" .= "www.stupidurl.com"), ("port".= 2000)]]))
 
 ```
@@ -101,6 +129,7 @@ alarm-state-config:
 The client(The Node) requests the config (from the node manager) with:
 
 ```
+$> (retrieveCfg api) <Value Object just like post example>
 
 $> post "http://some.lame.nodemanager.com/configure/retrieve" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val".= 2)])])
 
@@ -119,6 +148,8 @@ Which the node can then use to configure itself.
 To delete existing configuration files, post the name of the file.
 
 ```
+$> (deleteCfg api) <Value Object just like post example>
+
 $> post "http://some.lame.nodemanager.com/configure/delete" (toJSON "alarm-state-config")
 
 ```
@@ -128,80 +159,11 @@ $> post "http://some.lame.nodemanager.com/configure/delete" (toJSON "alarm-state
 Another node manager requests the copies of all the configs from another node manager:
 
 ```
+$> (copyCfg api) <Value Object just like post example>
+
 $> post "http://some.lame.nodemanager.com/configure/copy" (toJSON object[("route".="another.lame.nodemanager.com/configure/add")]) 
 
 ```
-
-
-## Using to monitor Nodes
-
-Important types
-
-``` haskell
-
-data CheckType = GET | POST
-
-data KillMethod = KillUrl Text | KillPID Int | KillNONE
-
-data NodeProcess = NodeProcess {
-         , checkName :: Text
-         , checkUrl :: Text
-         , checkBody :: Value
-         , checkMethod :: CheckType
-         , checkTime :: Int
-         , checkKillMethod :: KillNONE
-         
-     }
-```
-
-### Register a process
-(using wreq in this example)
-
-``` haskell
-
-#
-$> post "http://node.manager.local/start"  (toJSON $ object ["checkName" .= "AlarmNode1" , "checkUrl" .= "http://10.121.38.159:2233/alarm-status" , "checkBody" .= (toJSON $ object ["alarmId1" .= 3]) , "checkMethod" .= POST 
-                                                            , "checkTime" .= 3600 , "checkKillMethod" .= (KillUrl "http://10.121.38.159:2233/kill-me" ) ])
-Checking ... OK
-
-New Process Monitor AlarmNode1 started on Sun Jul 20 10:15:33 CDT 2014
-
-```
-
-
-### Check what is running!
-
-``` haskell
-
-$> get "http://node.manager.local/node?name="AlarmNode1"" 
-NodeRunning up since Sun Jul 20 10:15:33 CDT 2014
-
-```
-
-
-### Tell other node-managers about this one
-
-Node managers can't take over for others, but you can register a url and msg that should occur on these other nodes when something goes wrong.
-
-``` haskell
-
-$> post "http://node.manager.local/register"  (toJSON $ object ["nodeUrls" .= ["url" .= "http://10.121.38.159" , "port" .= 2000
-                                                                              ,"url" .= "http://10.121.38.259" , "port" .= 2000
-                                                                              ,"url" .= "http://10.121.38.359" , "port" .= 2000
-                                                                              ,"url" .= "http://10.121.38.459" , "port" .= 2000 ]
-                                                               , "timer" .= 3600
-                                                               , onFail .= [ "url" .= "http://10.121.38.159:3111/cryout" , "message" .= (object [msg .= "AlarmNode1 has failed"])
-                                                                            ,"method" .= POST ] ])
-
-nodeRegisteredWith http://10.121.38.259 port 2000
-nodeRegisteredWith http://10.121.38.359 port 2000
-nodeRegisteredWith http://10.121.38.459 port 2000
-
-
-```
-
-
-
 ### Configure a Node-Manager
 
 ```

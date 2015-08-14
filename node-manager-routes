@@ -4,6 +4,7 @@
 -- Config Files
 /configure/get ConfigureR GET
 /configure/retrieve RetrieveConfigureR POST
+/configure/edit EditConfigureR POST
 /configure/add AddConfigureR POST
 /configure/delete DeleteConfigureR POST
 /configure/copy CopyConfigureR POST
