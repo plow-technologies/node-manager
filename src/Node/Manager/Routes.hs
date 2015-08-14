@@ -7,16 +7,16 @@
 
 
 module Node.Manager.Routes where
-
+import           Control.Applicative
 import           Control.Exception          (catch, throwIO)
-import           Control.Lens               (set, traverse, view, views, (&),
-                                             (.~))
+import           Control.Lens               (set, traverse, view, views, (%~),
+                                             (&), (.~), (^?))
 import           Control.Monad              (void)
 import           Control.Monad.Trans.Either
 import           Data.Aeson                 (ToJSON, Value, eitherDecode,
                                              toJSON)
 import           Data.Aeson.Lens            (AsValue, key, members, _JSON,
-                                             _Object, _String)
+                                             _Object, _String, _Value)
 import qualified Data.ByteString            as BS (readFile)
 import qualified Data.ByteString.Lazy       as LBS (fromStrict, readFile,
                                                     writeFile)
@@ -53,7 +53,7 @@ makeKeyArr = view ( key "rewrite-rules" ._JSON )
 -- rule
 
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules  = foldl' (\j edit -> j & (members . key (editKey edit)) .~ (editValue edit) )
+rewriteRules  = foldl' (\j edit -> j & (members . key (editKey edit)) .~ editValue edit)
 
 writeConfigFile :: (AsValue s, ToJSON s) => s -> IO ()
 writeConfigFile parsed' = do
@@ -96,7 +96,7 @@ server = retrieveConfig
             Nothing -> return . toJSON $ ("" :: String)
             Just json -> do
               let editKeys = makeKeyArr configuration
-              return $ rewriteRules json editKeys
+              return $ json & key (T.pack t) %~ flip rewriteRules editKeys
     addConfig :: Value -> EitherT ServantErr IO Value
     addConfig config = do
       let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
@@ -110,14 +110,14 @@ server = retrieveConfig
           return config
     editConfig :: Value -> EitherT ServantErr IO Value
     editConfig config = do
-      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
+      let mTitle = views (key "configName" . _String) T.unpack config
       case mTitle of
-        Nothing -> do
+        "" -> do
           liftIO $ print "Could not find field config name"
           return $ toJSON ( "Could not find field config name" :: T.Text)
-        Just t -> do
+        t -> do
           liftIO $ print "running editConfig"
-          bsSettings <- liftIO $ BS.readFile $ "./configs/" ++ T.unpack t  ++ ".yml"
+          bsSettings <- liftIO $ BS.readFile $ "./configs/" ++ t  ++ ".yml"
           case (Y.decode bsSettings :: Maybe Value) of
             Nothing -> do
               liftIO $ print "Invalid Value"

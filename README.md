@@ -42,6 +42,27 @@ alarm-state-config:
 ```
 To be requested by a node in the future
 
+### Editing a Configuration
+
+To replace existing default configuration files, post the new configuration settings to the same name
+
+```
+$> post "http://some.lame.nodemanager.com/configure/edit" (toJSON (object ["configName" .= "alarm-state-config", "rewrite-rules" .= [object ["key" .= "port", "val" .= 4]]]))
+
+```
+configuration file is now
+
+```
+alarm-state-config:
+   tag: 2000
+   src:
+     almKeySrc:
+       unSText: onping.plowtech.net
+   host:www.stupidurl.com
+   port: 2000
+
+```
+
 ### Replacing a Configuration
 
 To replace existing default configuration files, post the new configuration settings to the same name
@@ -81,7 +102,7 @@ The client(The Node) requests the config (from the node manager) with:
 
 ```
 
-$> post "http://some.lame.nodemanager.com/configure/edit" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val".= 2)])])
+$> post "http://some.lame.nodemanager.com/configure/retrieve" (toJSON $ object ["configName" .= "alarm-state-config" , "rewrite-rules" .= (object [("key" .= "port") , ("val".= 2)])])
 
 ```
 
