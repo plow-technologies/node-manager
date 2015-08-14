@@ -9,14 +9,17 @@
 module Node.Manager.Routes where
 
 import           Control.Exception          (catch, throwIO)
-import           Control.Lens               (set, traverse, view, views)
+import           Control.Lens               (set, traverse, view, views, (&),
+                                             (.~))
 import           Control.Monad              (void)
 import           Control.Monad.Trans.Either
-import           Data.Aeson                 (ToJSON, Value, toJSON)
+import           Data.Aeson                 (ToJSON, Value, eitherDecode,
+                                             toJSON)
 import           Data.Aeson.Lens            (AsValue, key, members, _JSON,
                                              _Object, _String)
 import qualified Data.ByteString            as BS (readFile)
-import qualified Data.ByteString.Lazy       as LBS (fromStrict, writeFile)
+import qualified Data.ByteString.Lazy       as LBS (fromStrict, readFile,
+                                                    writeFile)
 import qualified Data.HashMap.Strict        as HM (toList)
 import           Data.List                  (foldl')
 import           Data.Maybe                 (catMaybes, listToMaybe)
@@ -50,7 +53,7 @@ makeKeyArr = view ( key "rewrite-rules" ._JSON )
 -- rule
 
 rewriteRules :: Value -> [Vedit] -> Value
-rewriteRules  = foldl' (\j edit -> set (members . key (editKey edit)) (editValue edit) j)
+rewriteRules  = foldl' (\j edit -> j & (members . key (editKey edit)) .~ (editValue edit) )
 
 writeConfigFile :: (AsValue s, ToJSON s) => s -> IO ()
 writeConfigFile parsed' = do
@@ -70,20 +73,24 @@ removeExisting file = removeFile file `catch` handleExists
 
 
 server :: Server API
-server = editConfig
+server = retrieveConfig
     :<|> addConfig
     :<|> deleteConfig
     :<|> copyConfig
     :<|> cloneDir
     :<|> getConfigure
+    :<|> editConfig
     :<|> docs
   where
-    editConfig :: Value -> EitherT ServantErr IO Value
-    editConfig configuration  = do
+    retrieveConfig :: Value -> EitherT ServantErr IO Value
+    retrieveConfig configuration  = do
       let mTitle = views (key "configName" . _String) T.unpack configuration
       case mTitle of
-        "" -> return $ toJSON ( "Could not find field config name" :: T.Text)
+        "" -> do
+          liftIO $ print "Could not find field config name"
+          return $ toJSON ( "Could not find field config name" :: T.Text)
         t -> do
+          liftIO $ print "running retrieveConfig"
           file <- liftIO $ BS.readFile $ "./configs/" ++ t ++ ".yml"
           case (Y.decode file :: Maybe Value) of
             Nothing -> return . toJSON $ ("" :: String)
@@ -94,16 +101,38 @@ server = editConfig
     addConfig config = do
       let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
       case mTitle of
-        Nothing ->  return $ toJSON ( "Could not find field config name" :: T.Text)
+        Nothing -> do
+          liftIO $ print "Could not find field config name"
+          return $ toJSON ( "Could not find field config name" :: T.Text)
         Just t -> do
+          liftIO $ print "running addConfig"
           liftIO . LBS.writeFile ("./configs/" ++ T.unpack t  ++ ".yml") . LBS.fromStrict . Y.encode $ config
           return config
+    editConfig :: Value -> EitherT ServantErr IO Value
+    editConfig config = do
+      let mTitle = listToMaybe $ views _Object (\obj -> fmap fst . HM.toList $  obj) config
+      case mTitle of
+        Nothing -> do
+          liftIO $ print "Could not find field config name"
+          return $ toJSON ( "Could not find field config name" :: T.Text)
+        Just t -> do
+          liftIO $ print "running editConfig"
+          bsSettings <- liftIO $ BS.readFile $ "./configs/" ++ T.unpack t  ++ ".yml"
+          case (Y.decode bsSettings :: Maybe Value) of
+            Nothing -> do
+              liftIO $ print "Invalid Value"
+              return ("" :: Value)
+            Just json -> do
+              let editKeys = makeKeyArr config
+              let settings = rewriteRules json editKeys
+              addConfig settings
     deleteConfig :: Value -> EitherT ServantErr IO Value
     deleteConfig config = do
       let pTitle = views _String T.unpack config
       case pTitle of
         "" ->  return $ toJSON ( "Cannot match blank title" :: T.Text)
         title' -> do
+           liftIO $ print "running deleteConfig"
            liftIO . removeExisting . FPQ.fromText . T.pack $ ("./configs/" ++ title' ++ ".yml")
            return . toJSON $ ("Success! " ++ title' ++ " was removed..")
     copyConfig :: Value -> EitherT ServantErr IO Value

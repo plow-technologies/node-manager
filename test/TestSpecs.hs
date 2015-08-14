@@ -28,7 +28,7 @@ configSpec = do
 
   describe "/configure/edit --No Rewrite" $
     it "Returns a config using configName, no rewriteRule" $ do
-    eResult <- runEitherT $ editConfig testRetriveRequest
+    eResult <- runEitherT $ retrieveConfig testRetriveRequest
     let passed = case eResult of
                    Right _ -> True
                    _       -> False
@@ -36,7 +36,7 @@ configSpec = do
 
   describe "/configure/edit --Rewrite" $
     it "Returns a config using configName, using rewriteRule" $ do
-    eResult <- runEitherT $ editConfig testRetriveRequestWRewrite
+    eResult <- runEitherT $ retrieveConfig testRetriveRequestWRewrite
     let passed = case eResult of
                    Right _ -> True
                    _       -> False
