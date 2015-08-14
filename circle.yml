@@ -11,7 +11,9 @@ dependencies:
     - dist
 
   override:
-    - "if grep -Fxq 'remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive' ~/.cabal/config; then echo 'Already in config file'; else echo remote-repo: hackage.plowtech.net:http://hackage.plowtech.net/packages/archive >> ~/.cabal/config; fi"
+    - if cabal --version | grep 1.23.0.0; then echo "Version 1.23.0.0"; else cd ~/ && git clone https://github.com/plow-technologies/cabal.git && cd cabal && cabal --no-require-sandbox install -j2 Cabal/ cabal-install/; fi
+    - git clone git@github.com:plow-technologies/plow-scripts.git
+    - cp plow-scripts/config $HOME/.cabal/config
     - cabal update
     - if [-f ./.cabal-sandbox/packages]; then rm .cabal-sandbox/packages/*; fi
     - cabal sandbox init
